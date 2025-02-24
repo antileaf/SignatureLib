@@ -1,0 +1,13 @@
+{
+  "modid": "SignatureLib",
+  "name": "STS Signature Lib",
+  "author_list": [
+    "antileaf"
+  ],
+  "description": "A library for adding cool signature cards to your mod.",
+  "dependencies": [
+    "basemod"
+  ],
+  "version": "0.0.9",
+  "sts_version": "9-21-2023"
+}
