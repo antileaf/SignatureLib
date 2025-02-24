@@ -30,7 +30,8 @@ public class ForceToShowDescriptionPatch {
 					if (SignatureHelper.shouldUseSignature(___hoveredCard))
 						SignatureHelper.forceToShowDescription(___hoveredCard);
 
-					if (SignatureHelper.shouldUseSignature(_inst.upgradePreviewCard))
+					if (_inst.upgradePreviewCard != null &&
+							SignatureHelper.shouldUseSignature(_inst.upgradePreviewCard))
 						SignatureHelper.forceToShowDescription(_inst.upgradePreviewCard);
 				}
 			}
@@ -47,7 +48,8 @@ public class ForceToShowDescriptionPatch {
 						SignatureHelper.forceToShowDescription(c);
 				});
 
-				if (SignatureHelper.shouldUseSignature(_inst.upgradePreviewCard))
+				if (_inst.upgradePreviewCard != null &&
+						SignatureHelper.shouldUseSignature(_inst.upgradePreviewCard))
 					SignatureHelper.forceToShowDescription(_inst.upgradePreviewCard);
 			}
 		}
