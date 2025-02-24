@@ -69,6 +69,11 @@ public abstract class SignatureHelper {
 			return;
 		}
 
+		if (!Gdx.files.internal(info.img).exists()) {
+			logger.error("Image file {} not found", info.img);
+			return;
+		}
+
 		registered.put(id, info);
 	}
 
@@ -143,7 +148,7 @@ public abstract class SignatureHelper {
 		if (!enabled.containsKey(id))
 			enabled.put(id, ConfigHelper.isSignatureEnabled(id));
 
-		if (!isUnlocked(id))
+		if (!isUnlocked(id) && !ConfigHelper.enableDebugging())
 			enable(id, false);
 
 		return enabled.get(id);
@@ -154,8 +159,8 @@ public abstract class SignatureHelper {
 		enabled.put(id, enable);
 	}
 
-	public static boolean shouldUseSignature(String id) {
-		return isUnlocked(id) && isEnabled(id);
+	public static boolean shouldUseSignature(AbstractCard card) {
+		return hasSignature(card) && isUnlocked(card.cardID) && isEnabled(card.cardID);
 	}
 
 	public static class Info {
@@ -255,8 +260,9 @@ public abstract class SignatureHelper {
 		);
 	}
 
-	public static boolean usePatch(String id) {
-		return SignatureHelper.isRegistered(id) && SignatureHelper.shouldUseSignature(id);
+	public static boolean usePatch(AbstractCard card) {
+		return SignatureHelper.isRegistered(card.cardID) &&
+				SignatureHelper.shouldUseSignature(card);
 	}
 
 	public static void forceToShowDescription(AbstractCard card) {

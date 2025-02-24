@@ -32,7 +32,7 @@ public class SignaturePatch {
 	public static class UpdatePatch {
 		@SpirePostfixPatch
 		public static void Postfix(AbstractCard _inst) {
-			if (SignatureHelper.usePatch(_inst.cardID)) {
+			if (SignatureHelper.usePatch(_inst)) {
 				float hoveredTimer = Fields.signatureHoveredTimer.get(_inst);
 				float forcedTimer = Fields.forcedTimer.get(_inst);
 
@@ -74,7 +74,7 @@ public class SignaturePatch {
 	public static class HoverPatch {
 		@SpirePostfixPatch
 		public static void Postfix(AbstractCard _inst) {
-			if (SignatureHelper.usePatch(_inst.cardID)) {
+			if (SignatureHelper.usePatch(_inst)) {
 				Fields.signatureHovered.set(_inst, true);
 			}
 		}
@@ -84,7 +84,7 @@ public class SignaturePatch {
 	public static class UnhoverPatch {
 		@SpirePostfixPatch
 		public static void Postfix(AbstractCard _inst) {
-			if (SignatureHelper.usePatch(_inst.cardID)) {
+			if (SignatureHelper.usePatch(_inst)) {
 				Fields.signatureHovered.set(_inst, false);
 			}
 		}
@@ -97,7 +97,7 @@ public class SignaturePatch {
 
 		@SpirePrefixPatch
 		public static SpireReturn<Void> Prefix(AbstractCard _inst, SpriteBatch sb) {
-			if (SignatureHelper.usePatch(_inst.cardID)) {
+			if (SignatureHelper.usePatch(_inst)) {
 				float transparency = getSignatureTransparency(_inst);
 
 				if (transparency <= 0.0F)
@@ -117,7 +117,7 @@ public class SignaturePatch {
 
 		@SpirePostfixPatch
 		public static void Postfix(AbstractCard _inst, SpriteBatch sb) {
-			if (SignatureHelper.usePatch(_inst.cardID) && getSignatureTransparency(_inst) > 0.0F) {
+			if (SignatureHelper.usePatch(_inst) && getSignatureTransparency(_inst) > 0.0F) {
 				Color textColor = ReflectionHacks.getPrivate(_inst, AbstractCard.class, "textColor");
 				Color goldColor = ReflectionHacks.getPrivate(_inst, AbstractCard.class, "goldColor");
 
@@ -164,7 +164,7 @@ public class SignaturePatch {
 		@SpirePrefixPatch
 		public static void Prefix(AbstractCard _inst, SpriteBatch sb,
 								  TextureAtlas.AtlasRegion region, float x, float y) {
-			if (SignatureHelper.usePatch(_inst.cardID)) {
+			if (SignatureHelper.usePatch(_inst)) {
 				Color renderColor = getRenderColor(_inst);
 
 				alpha = renderColor.a;
@@ -175,7 +175,7 @@ public class SignaturePatch {
 		@SpirePostfixPatch
 		public static void Postfix(AbstractCard _inst, SpriteBatch sb,
 								   TextureAtlas.AtlasRegion region, float x, float y) {
-			if (SignatureHelper.usePatch(_inst.cardID)) {
+			if (SignatureHelper.usePatch(_inst)) {
 				getRenderColor(_inst).a = alpha;
 			}
 		}
@@ -186,7 +186,7 @@ public class SignaturePatch {
 	public static class RenderImagePatch {
 		@SpirePostfixPatch
 		public static void Postfix(AbstractCard _inst, SpriteBatch sb, boolean hovered, boolean selected) {
-			if (SignatureHelper.usePatch(_inst.cardID)) {
+			if (SignatureHelper.usePatch(_inst)) {
 				Color renderColor = getRenderColor(_inst);
 				float alpha = renderColor.a;
 				renderColor.a *= getSignatureTransparency(_inst);
@@ -210,7 +210,7 @@ public class SignaturePatch {
 	public static class RenderCardBgPatch {
 		@SpirePrefixPatch
 		public static SpireReturn<Void> Prefix(AbstractCard _inst, SpriteBatch sb, float x, float y) {
-			if (SignatureHelper.usePatch(_inst.cardID))
+			if (SignatureHelper.usePatch(_inst))
 				return SpireReturn.Return();
 
 			return SpireReturn.Continue();
@@ -222,7 +222,7 @@ public class SignaturePatch {
 	public static class RenderPortraitPatch {
 		@SpirePrefixPatch
 		public static SpireReturn<Void> Prefix(AbstractCard _inst, SpriteBatch sb) {
-			if (SignatureHelper.usePatch(_inst.cardID)) {
+			if (SignatureHelper.usePatch(_inst)) {
 				sb.setColor(getRenderColor(_inst));
 				sb.draw(SignatureHelper.load(SignatureHelper.getInfo(_inst.cardID).portrait),
 						_inst.current_x - 256.0F,
@@ -286,7 +286,7 @@ public class SignaturePatch {
 	public static class RenderPortraitFramePatch {
 		@SpirePrefixPatch
 		public static SpireReturn<Void> Prefix(AbstractCard _inst, SpriteBatch sb, float x, float y) {
-			if (SignatureHelper.usePatch(_inst.cardID)) {
+			if (SignatureHelper.usePatch(_inst)) {
 				TextureAtlas.AtlasRegion frame = getFrame(_inst);
 
 				if (frame != null)
@@ -304,7 +304,7 @@ public class SignaturePatch {
 	public static class RenderBannerImagePatch {
 		@SpirePrefixPatch
 		public static SpireReturn<Void> Prefix(AbstractCard _inst, SpriteBatch sb, float x, float y) {
-			if (SignatureHelper.usePatch(_inst.cardID))
+			if (SignatureHelper.usePatch(_inst))
 				return SpireReturn.Return();
 
 			return SpireReturn.Continue();
@@ -316,7 +316,7 @@ public class SignaturePatch {
 	public static class RenderTypePatch {
 		@SpirePrefixPatch
 		public static SpireReturn<Void> Prefix(AbstractCard _inst, SpriteBatch sb) {
-			if (SignatureHelper.usePatch(_inst.cardID)) {
+			if (SignatureHelper.usePatch(_inst)) {
 				if (getFrame(_inst) != null) {
 					String text;
 					if (_inst.type == AbstractCard.CardType.ATTACK)
@@ -362,7 +362,7 @@ public class SignaturePatch {
 
 		@SpireInsertPatch(locator = Locator.class)
 		public static void Insert(AbstractCard _inst, SpriteBatch sb) {
-			if (SignatureHelper.shouldUseSignature(_inst.cardsToPreview.cardID))
+			if (SignatureHelper.shouldUseSignature(_inst.cardsToPreview))
 				setPreviewTransparency(_inst.cardsToPreview, 1.0F);
 		}
 	}
@@ -374,7 +374,7 @@ public class SignaturePatch {
 		public static void Prefix(AbstractCard _inst, SpriteBatch sb) {
 			if (MultiCardPreview.multiCardPreview.get(_inst) != null)
 				for (AbstractCard preview : MultiCardPreview.multiCardPreview.get(_inst))
-					if (SignatureHelper.shouldUseSignature(preview.cardID))
+					if (SignatureHelper.shouldUseSignature(preview))
 						setPreviewTransparency(preview, 1.0F);
 		}
 	}

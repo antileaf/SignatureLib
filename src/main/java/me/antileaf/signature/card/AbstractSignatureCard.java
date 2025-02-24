@@ -55,10 +55,6 @@ public abstract class AbstractSignatureCard extends CustomCard {
 		this.signaturePortrait = SignatureHelper.load(this.getSignatureImgPath());
 		if (this.signaturePortrait != null)
 			this.hasSignature = true;
-		else {
-			SignatureHelper.unlock(this.cardID, false);
-			SignatureHelper.enable(this.cardID, false);
-		}
 	}
 
 	public String getSignatureImgPath() {
@@ -128,17 +124,17 @@ public abstract class AbstractSignatureCard extends CustomCard {
 	public void renderCardTip(SpriteBatch sb) {
 		super.renderCardTip(sb);
 
-		float transparency = SignatureHelper.shouldUseSignature(this.cardID) ?
+		float transparency = SignatureHelper.shouldUseSignature(this) ?
 				this.getSignatureTransparency() : 1.0F;
 
 		if (this.cardsToPreview instanceof AbstractSignatureCard &&
-				SignatureHelper.shouldUseSignature(this.cardsToPreview.cardID))
+				SignatureHelper.shouldUseSignature(this.cardsToPreview))
 			((AbstractSignatureCard) this.cardsToPreview).previewTransparency = transparency;
 
 		if (MultiCardPreview.multiCardPreview.get(this) != null) {
 			for (AbstractCard c : MultiCardPreview.multiCardPreview.get(this)) {
 				if (c instanceof AbstractSignatureCard &&
-						SignatureHelper.shouldUseSignature(c.cardID))
+						SignatureHelper.shouldUseSignature(c))
 					((AbstractSignatureCard) c).previewTransparency = transparency;
 			}
 		}
@@ -146,7 +142,7 @@ public abstract class AbstractSignatureCard extends CustomCard {
 
 	@SpireOverride
 	protected void renderDescription(SpriteBatch sb) {
-		if (!SignatureHelper.shouldUseSignature(this.cardID)) {
+		if (!SignatureHelper.shouldUseSignature(this)) {
 			SpireSuper.call(sb);
 			return;
 		}
@@ -167,7 +163,7 @@ public abstract class AbstractSignatureCard extends CustomCard {
 
 	@SpireOverride
 	protected void renderDescriptionCN(SpriteBatch sb) {
-		if (!SignatureHelper.shouldUseSignature(this.cardID)) {
+		if (!SignatureHelper.shouldUseSignature(this)) {
 			SpireSuper.call(sb);
 			return;
 		}
@@ -203,7 +199,7 @@ public abstract class AbstractSignatureCard extends CustomCard {
 
 	@Override
 	public void renderSmallEnergy(SpriteBatch sb, TextureAtlas.AtlasRegion region, float x, float y) {
-		if (SignatureHelper.shouldUseSignature(this.cardID)) {
+		if (SignatureHelper.shouldUseSignature(this)) {
 			Color renderColor = this.getRenderColor();
 
 			float alpha = renderColor.a;
@@ -221,7 +217,7 @@ public abstract class AbstractSignatureCard extends CustomCard {
 	protected void renderImage(SpriteBatch sb, boolean hovered, boolean selected) {
 		SpireSuper.call(sb, hovered, selected);
 
-		if (SignatureHelper.shouldUseSignature(this.cardID) && this.getSignatureTransparency() > 0.0F) {
+		if (SignatureHelper.shouldUseSignature(this) && this.getSignatureTransparency() > 0.0F) {
 			Color renderColor = this.getRenderColor();
 
 			float alpha = renderColor.a;
@@ -240,13 +236,13 @@ public abstract class AbstractSignatureCard extends CustomCard {
 
 	@SpireOverride
 	protected void renderCardBg(SpriteBatch sb, float x, float y) {
-		if (!SignatureHelper.shouldUseSignature(this.cardID))
+		if (!SignatureHelper.shouldUseSignature(this))
 			SpireSuper.call(sb, x, y);
 	}
 
 	@SpireOverride
 	protected void renderPortrait(SpriteBatch sb) {
-		if (SignatureHelper.shouldUseSignature(this.cardID)) {
+		if (SignatureHelper.shouldUseSignature(this)) {
 			sb.setColor(this.getRenderColor());
 			sb.draw(this.signaturePortrait,
 					this.current_x - 256.0F,
@@ -262,7 +258,7 @@ public abstract class AbstractSignatureCard extends CustomCard {
 
 	@SpireOverride
 	protected void renderJokePortrait(SpriteBatch sb) {
-		if (SignatureHelper.shouldUseSignature(this.cardID))
+		if (SignatureHelper.shouldUseSignature(this))
 			this.renderPortrait(sb);
 		else
 			SpireSuper.call(sb);
@@ -270,7 +266,7 @@ public abstract class AbstractSignatureCard extends CustomCard {
 
 	@SpireOverride
 	protected void renderPortraitFrame(SpriteBatch sb, float x, float y) {
-		if (SignatureHelper.shouldUseSignature(this.cardID)) {
+		if (SignatureHelper.shouldUseSignature(this)) {
 			TextureAtlas.AtlasRegion frame;
 
 			if (this.type == AbstractCard.CardType.ATTACK) {
@@ -307,13 +303,13 @@ public abstract class AbstractSignatureCard extends CustomCard {
 
 	@SpireOverride
 	protected void renderBannerImage(SpriteBatch sb, float x, float y) {
-		if (!SignatureHelper.shouldUseSignature(this.cardID))
+		if (!SignatureHelper.shouldUseSignature(this))
 			SpireSuper.call(sb, x, y);
 	}
 
 	@SpireOverride
 	protected void renderType(SpriteBatch sb) {
-		if (!SignatureHelper.shouldUseSignature(this.cardID)) {
+		if (!SignatureHelper.shouldUseSignature(this)) {
 			SpireSuper.call(sb);
 			return;
 		}
