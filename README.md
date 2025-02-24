@@ -22,7 +22,7 @@
 
 AbstractSignatureCard 的构造函数参数和 CustomCard 是完全一致的。
 
-如果卡图路径中包括 "/cards/" 或者 "/card/"，则会将其替换成 "/signatures/" 作为异画的默认路径；
+如果卡图路径中包括 "/cards/" 或者 "/card/"，则会将其替换成 "/signature/" 作为异画的默认路径；
 否则将会使用原路径。
 
 卡图文件的名称默认情况下以 "_s.png" 和 "_s_p.png" 结尾。
