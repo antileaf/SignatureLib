@@ -55,6 +55,10 @@ public abstract class AbstractSignatureCard extends CustomCard {
 		this.signaturePortrait = SignatureHelper.load(this.getSignatureImgPath());
 		if (this.signaturePortrait != null)
 			this.hasSignature = true;
+		else {
+			SignatureHelper.unlock(this.cardID, false);
+			SignatureHelper.enable(this.cardID, false);
+		}
 	}
 
 	public String getSignatureImgPath() {
