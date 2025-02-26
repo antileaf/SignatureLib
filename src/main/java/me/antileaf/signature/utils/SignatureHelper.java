@@ -1,202 +1,155 @@
 package me.antileaf.signature.utils;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.TextureAtlas;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 import com.megacrit.cardcrawl.cards.AbstractCard;
-import com.megacrit.cardcrawl.core.CardCrawlGame;
-import com.megacrit.cardcrawl.helpers.CardLibrary;
-import com.megacrit.cardcrawl.helpers.ImageMaster;
-import me.antileaf.signature.card.AbstractSignatureCard;
-import me.antileaf.signature.patches.SignaturePatch;
-import me.antileaf.signature.patches.card.UnlockConditionPatch;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import me.antileaf.signature.interfaces.SignatureSubscriber;
+import me.antileaf.signature.utils.internal.SignatureHelperInternal;
 
-import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 public abstract class SignatureHelper {
-	private static final Logger logger = LogManager.getLogger(SignatureHelper.class);
-
-	public static final float FADE_DURATION = 0.3F;
-	public static final float FORCED_FADE_DURATION = 0.5F;
-
 	public static final Style DEFAULT_STYLE;
 
-	private static final Map<String, Info> registered = new HashMap<>();
-
-	private static final Map<String, Boolean> unlocked = new HashMap<>();
-	private static final Map<String, Boolean> enabled = new HashMap<>();
-	private static final Map<String, Texture> cache = new HashMap<>();
-
-	private static final Set<String> noDebugging = new HashSet<>();
-	private static final Set<String> noDebuggingPrefixes = new HashSet<>();
-
-	public static TextureAtlas.AtlasRegion load(String path) {
-		Texture t;
-
-		if (cache.containsKey(path))
-			t = cache.get(path);
-		else {
-			if (Gdx.files.internal(path).exists())
-				t = ImageMaster.loadImage(path);
-			else
-				t = null;
-
-			cache.put(path, t);
-		}
-
-		return t == null ? null :
-				new TextureAtlas.AtlasRegion(t, 0, 0, t.getWidth(), t.getHeight());
-	}
-
 	public static void register(String id, Info info) {
-		AbstractCard card = CardLibrary.getCard(id);
-
-		if (card == null) {
-			logger.error("Card with ID {} not found", id);
-			return;
-		}
-
-		if (card instanceof AbstractSignatureCard) {
-			logger.warn("Please do not register a card that already extends AbstractSignatureCard");
-			return;
-		}
-
-		if (!Gdx.files.internal(info.img).exists()) {
-			logger.error("Image file {} not found", info.img);
-			return;
-		}
-
-		registered.put(id, info);
-	}
-
-	public static boolean isRegistered(String id) {
-		return registered.containsKey(id);
-	}
-
-	public static Info getInfo(String id) {
-		return registered.get(id);
-	}
-
-	public static Style getStyle(AbstractCard card) {
-		return card instanceof AbstractSignatureCard ?
-				((AbstractSignatureCard) card).style :
-				getInfo(card.cardID).style;
-	}
-
-	public static boolean hasSignature(AbstractCard card) {
-		if (card instanceof AbstractSignatureCard)
-			return ((AbstractSignatureCard) card).hasSignature;
-		else
-			return isRegistered(card.cardID);
-	}
-
-	public static boolean isUnlocked(String id) {
-		if (ConfigHelper.enableDebugging() && !noDebugging.contains(id) &&
-				noDebuggingPrefixes.stream().noneMatch(id::startsWith))
-			return true;
-
-		if (!unlocked.containsKey(id))
-			unlocked.put(id, ConfigHelper.isSignatureUnlocked(id));
-
-		return unlocked.get(id);
-	}
-
-	public static void setDebugging(String id, boolean available) {
-		if (available)
-			noDebugging.add(id);
-		else
-			noDebugging.remove(id);
-	}
-
-	public static void noDebugging(String id) {
-		noDebugging.add(id);
-	}
-
-	public static void noDebuggingPrefix(String prefix) {
-		noDebuggingPrefixes.add(prefix);
+		SignatureHelperInternal.register(id, info);
 	}
 
 	public static void unlock(String id, boolean unlock) {
-		ConfigHelper.setSignatureUnlocked(id, unlock);
-		unlocked.put(id, unlock);
-	}
-
-	public static String getUnlockCondition(String id) {
-		return UnlockConditionPatch.Fields.unlockCondition.get(CardCrawlGame.languagePack.getCardStrings(id));
-	}
-
-	public static void addUnlockConditions(String jsonFile) {
-		Map<String, String> conditions = (new Gson()).fromJson(
-				Gdx.files.internal(jsonFile).readString(String.valueOf(StandardCharsets.UTF_8)),
-				(new TypeToken<Map<String, String>>() {}).getType());
-
-		for (Map.Entry<String, String> entry : conditions.entrySet())
-			UnlockConditionPatch.Fields.unlockCondition.set(
-					CardCrawlGame.languagePack.getCardStrings(entry.getKey()),
-					entry.getValue());
-	}
-
-	public static boolean isEnabled(String id) {
-		if (!enabled.containsKey(id))
-			enabled.put(id, ConfigHelper.isSignatureEnabled(id));
-
-		if (!isUnlocked(id) && !ConfigHelper.enableDebugging())
-			enable(id, false);
-
-		return enabled.get(id);
+		SignatureHelperInternal.unlock(id, unlock);
 	}
 
 	public static void enable(String id, boolean enable) {
-		ConfigHelper.setSignatureEnabled(id, enable);
-		enabled.put(id, enable);
+		SignatureHelperInternal.enable(id, enable);
 	}
 
-	public static boolean shouldUseSignature(AbstractCard card) {
-		return hasSignature(card) && isUnlocked(card.cardID) && isEnabled(card.cardID);
+	public static void noDebugging(String id) {
+		SignatureHelperInternal.noDebugging(id);
+	}
+
+	public static void noDebuggingPrefix(String prefix) {
+		SignatureHelperInternal.noDebuggingPrefix(prefix);
+	}
+
+	public static void addUnlockConditions(String jsonFile) {
+		SignatureHelperInternal.addUnlockConditions(jsonFile);
+	}
+
+	public static boolean isUnlocked(String id) {
+		return SignatureHelperInternal.isUnlocked(id);
+	}
+
+	public static boolean isEnabled(String id) {
+		return SignatureHelperInternal.isEnabled(id);
+	}
+
+	public static void subscribe(SignatureSubscriber subscriber) {
+		SignatureHelperInternal.subscribe(subscriber);
+	}
+
+	public static void unsubscribe(SignatureSubscriber subscriber) {
+		SignatureHelperInternal.unsubscribe(subscriber);
 	}
 
 	public static class Info {
-		public final String img, portrait;
-		public final boolean dontAvoidSCVPanel;
+//		public final String img, portrait;
+		public final Function<AbstractCard, String> img, portrait;
+		public final Predicate<AbstractCard> shouldUseSignature;
+		public final String parentID;
+		public final boolean hideSCVPanel, dontAvoidSCVPanel;
 		public final Style style;
 
-		public Info(String img, String portrait, boolean dontAvoidSCVPanel, Style style) {
+		public Info(Function<AbstractCard, String> img, Function<AbstractCard, String> portrait,
+					Predicate<AbstractCard> shouldUseSignature, String parentID,
+					boolean hideSCVPanel, boolean dontAvoidSCVPanel, Style style) {
 			this.img = img;
 			this.portrait = portrait;
+			this.shouldUseSignature = shouldUseSignature;
+			this.parentID = parentID;
+			this.hideSCVPanel = hideSCVPanel;
 			this.dontAvoidSCVPanel = dontAvoidSCVPanel;
 			this.style = style;
 		}
 
-		public Info(String img, String portrait, boolean dontAvoidSCVPanel) {
-			this(img, portrait, dontAvoidSCVPanel, DEFAULT_STYLE);
+		public Info(Function<AbstractCard, String> img, Function<AbstractCard, String> portrait,
+					Predicate<AbstractCard> shouldUseSignature,
+					boolean hideSCVPanel, boolean dontAvoidSCVPanel) {
+			this(img, portrait, shouldUseSignature,
+					null, hideSCVPanel, dontAvoidSCVPanel, DEFAULT_STYLE);
 		}
 
-		public Info(String img, String portrait, Style style) {
-			this(img, portrait, false, style);
+		public Info(Function<AbstractCard, String> img, Function<AbstractCard, String> portrait,
+					Predicate<AbstractCard> shouldUseSignature, Style style) {
+			this(img, portrait, shouldUseSignature,
+					null, false, false, style);
+		}
+
+		public Info(Function<AbstractCard, String> img, Function<AbstractCard, String> portrait,
+					Predicate<AbstractCard> shouldUseSignature) {
+			this(img, portrait, shouldUseSignature, DEFAULT_STYLE);
+		}
+
+		public Info(Function<AbstractCard, String> img, Function<AbstractCard, String> portrait, Style style) {
+			this(img, portrait, c -> true, style);
+		}
+
+		public Info(Function<AbstractCard, String> img, Function<AbstractCard, String> portrait) {
+			this(img, portrait, DEFAULT_STYLE);
+		}
+
+		public Info(String img, String portrait, Predicate<AbstractCard> shouldUseSignature, Style style) {
+			this(c -> img, c -> portrait, shouldUseSignature, style);
+		}
+
+		public Info(String img, String portrait, Predicate<AbstractCard> shouldUseSignature) {
+			this(img, portrait, shouldUseSignature, DEFAULT_STYLE);
 		}
 
 		public Info(String img, String portrait) {
-			this(img, portrait, false);
+			this(c -> img, c -> portrait, c -> true);
+		}
+
+		public Info(Function<AbstractCard, String> img, Function<AbstractCard, String> portrait,
+					Predicate<AbstractCard> shouldUseSignature, String parentID, Style style) {
+			this(img, portrait, shouldUseSignature, parentID,
+					false, false, style);
+		}
+
+		public Info(Function<AbstractCard, String> img, Function<AbstractCard, String> portrait,
+					Predicate<AbstractCard> shouldUseSignature, String parentID) {
+			this(img, portrait, shouldUseSignature, parentID, DEFAULT_STYLE);
+		}
+
+		public Info(Function<AbstractCard, String> img, Function<AbstractCard, String> portrait, String parentID, Style style) {
+			this(img, portrait, c -> true, parentID, style);
+		}
+
+		public Info(Function<AbstractCard, String> img, Function<AbstractCard, String> portrait, String parentID) {
+			this(img, portrait, parentID, DEFAULT_STYLE);
+		}
+
+		public Info(String img, String portrait, Predicate<AbstractCard> shouldUseSignature, String parentID) {
+			this(c -> img, c -> portrait, shouldUseSignature, parentID);
+		}
+
+		public Info(String img, String portrait, String parentID, Style style) {
+			this(c -> img, c -> portrait, parentID, style);
+		}
+
+		public Info(String img, String portrait, String parentID) {
+			this(img, portrait, parentID, DEFAULT_STYLE);
 		}
 	}
 
 	public static class Style {
-		public TextureAtlas.AtlasRegion cardTypeAttackCommon, cardTypeAttackUncommon, cardTypeAttackRare;
-		public TextureAtlas.AtlasRegion cardTypeSkillCommon, cardTypeSkillUncommon, cardTypeSkillRare;
-		public TextureAtlas.AtlasRegion cardTypePowerCommon, cardTypePowerUncommon, cardTypePowerRare;
-		public TextureAtlas.AtlasRegion cardTypeAttackCommonP, cardTypeAttackUncommonP, cardTypeAttackRareP;
-		public TextureAtlas.AtlasRegion cardTypeSkillCommonP, cardTypeSkillUncommonP, cardTypeSkillRareP;
-		public TextureAtlas.AtlasRegion cardTypePowerCommonP, cardTypePowerUncommonP, cardTypePowerRareP;
-		public TextureAtlas.AtlasRegion descShadow, descShadowP;
-		public TextureAtlas.AtlasRegion descShadowSmall, descShadowSmallP;
+		public String cardTypeAttackCommon, cardTypeAttackUncommon, cardTypeAttackRare;
+		public String cardTypeSkillCommon, cardTypeSkillUncommon, cardTypeSkillRare;
+		public String cardTypePowerCommon, cardTypePowerUncommon, cardTypePowerRare;
+		public String cardTypeAttackCommonP, cardTypeAttackUncommonP, cardTypeAttackRareP;
+		public String cardTypeSkillCommonP, cardTypeSkillUncommonP, cardTypeSkillRareP;
+		public String cardTypePowerCommonP, cardTypePowerUncommonP, cardTypePowerRareP;
+		public String descShadow, descShadowP;
+		public String descShadowSmall, descShadowSmallP;
 
 		public Style() {}
 
@@ -208,33 +161,33 @@ public abstract class SignatureHelper {
 					 String cardTypePowerCommonP, String cardTypePowerUncommonP, String cardTypePowerRareP,
 					 String descShadow, String descShadowP,
 					 String descShadowSmall, String descShadowSmallP) {
-			this.cardTypeAttackCommon = load(cardTypeAttackCommon);
-			this.cardTypeAttackUncommon = load(cardTypeAttackUncommon);
-			this.cardTypeAttackRare = load(cardTypeAttackRare);
-			this.cardTypeSkillCommon = load(cardTypeSkillCommon);
-			this.cardTypeSkillUncommon = load(cardTypeSkillUncommon);
-			this.cardTypeSkillRare = load(cardTypeSkillRare);
-			this.cardTypePowerCommon = load(cardTypePowerCommon);
-			this.cardTypePowerUncommon = load(cardTypePowerUncommon);
-			this.cardTypePowerRare = load(cardTypePowerRare);
-			this.cardTypeAttackCommonP = load(cardTypeAttackCommonP);
-			this.cardTypeAttackUncommonP = load(cardTypeAttackUncommonP);
-			this.cardTypeAttackRareP = load(cardTypeAttackRareP);
-			this.cardTypeSkillCommonP = load(cardTypeSkillCommonP);
-			this.cardTypeSkillUncommonP = load(cardTypeSkillUncommonP);
-			this.cardTypeSkillRareP = load(cardTypeSkillRareP);
-			this.cardTypePowerCommonP = load(cardTypePowerCommonP);
-			this.cardTypePowerUncommonP = load(cardTypePowerUncommonP);
-			this.cardTypePowerRareP = load(cardTypePowerRareP);
-			this.descShadow = load(descShadow);
-			this.descShadowP = load(descShadowP);
-			this.descShadowSmall = load(descShadowSmall);
-			this.descShadowSmallP = load(descShadowSmallP);
+			this.cardTypeAttackCommon = cardTypeAttackCommon;
+			this.cardTypeAttackUncommon = cardTypeAttackUncommon;
+			this.cardTypeAttackRare = cardTypeAttackRare;
+			this.cardTypeSkillCommon = cardTypeSkillCommon;
+			this.cardTypeSkillUncommon = cardTypeSkillUncommon;
+			this.cardTypeSkillRare = cardTypeSkillRare;
+			this.cardTypePowerCommon = cardTypePowerCommon;
+			this.cardTypePowerUncommon = cardTypePowerUncommon;
+			this.cardTypePowerRare = cardTypePowerRare;
+			this.cardTypeAttackCommonP = cardTypeAttackCommonP;
+			this.cardTypeAttackUncommonP = cardTypeAttackUncommonP;
+			this.cardTypeAttackRareP = cardTypeAttackRareP;
+			this.cardTypeSkillCommonP = cardTypeSkillCommonP;
+			this.cardTypeSkillUncommonP = cardTypeSkillUncommonP;
+			this.cardTypeSkillRareP = cardTypeSkillRareP;
+			this.cardTypePowerCommonP = cardTypePowerCommonP;
+			this.cardTypePowerUncommonP = cardTypePowerUncommonP;
+			this.cardTypePowerRareP = cardTypePowerRareP;
+			this.descShadow = descShadow;
+			this.descShadowP = descShadowP;
+			this.descShadowSmall = descShadowSmall;
+			this.descShadowSmallP = descShadowSmallP;
 		}
 	}
 
 	static {
-		 DEFAULT_STYLE = new Style(
+		DEFAULT_STYLE = new Style(
 				"SignatureLib/512/attack_common.png",
 				"SignatureLib/512/attack_uncommon.png",
 				"SignatureLib/512/attack_rare.png",
@@ -258,17 +211,5 @@ public abstract class SignatureHelper {
 				"SignatureLib/512/desc_shadow_small.png",
 				"SignatureLib/1024/desc_shadow_small.png"
 		);
-	}
-
-	public static boolean usePatch(AbstractCard card) {
-		return SignatureHelper.isRegistered(card.cardID) &&
-				SignatureHelper.shouldUseSignature(card);
-	}
-
-	public static void forceToShowDescription(AbstractCard card) {
-		if (card instanceof AbstractSignatureCard)
-			((AbstractSignatureCard) card).forceToShowDescription();
-		else
-			SignaturePatch.forceToShowDescription(card);
 	}
 }

@@ -10,15 +10,15 @@ import com.badlogic.gdx.math.Vector2;
 import com.evacipated.cardcrawl.modthespire.lib.*;
 import com.evacipated.cardcrawl.modthespire.patcher.PatchingException;
 import com.megacrit.cardcrawl.cards.AbstractCard;
-import com.megacrit.cardcrawl.cards.status.Burn;
 import com.megacrit.cardcrawl.core.Settings;
 import com.megacrit.cardcrawl.helpers.FontHelper;
 import com.megacrit.cardcrawl.screens.SingleCardViewPopup;
 import javassist.CannotCompileException;
 import javassist.CtBehavior;
-import me.antileaf.signature.card.AbstractSignatureCard;
-import me.antileaf.signature.patches.SignaturePatch;
 import me.antileaf.signature.utils.SignatureHelper;
+import me.antileaf.signature.card.AbstractSignatureCard;
+import me.antileaf.signature.patches.card.SignaturePatch;
+import me.antileaf.signature.utils.internal.SignatureHelperInternal;
 
 import java.util.ArrayList;
 
@@ -40,12 +40,12 @@ public class SCVRenderCardPatch {
 	public static class LoadPortraitImgPatch {
 		@SpirePostfixPatch
 		public static void Postfix(SingleCardViewPopup _inst, AbstractCard ___card) {
-			if (SignatureHelper.hasSignature(___card)) {
+			if (SignatureHelperInternal.hasSignature(___card)) {
 				String sig = ___card instanceof AbstractSignatureCard ?
 						((AbstractSignatureCard) ___card).getSignaturePortraitImgPath() :
-						SignatureHelper.getInfo(___card.cardID).portrait;
+						SignatureHelperInternal.getInfo(___card.cardID).portrait.apply(___card);
 
-				Fields.signature.set(_inst, SignatureHelper.load(sig));
+				Fields.signature.set(_inst, SignatureHelperInternal.load(sig));
 			}
 		}
 	}
@@ -66,18 +66,19 @@ public class SCVRenderCardPatch {
 			if (___card.isLocked)
 				return SpireReturn.Continue();
 
-			if (SignatureHelper.shouldUseSignature(___card)) {
+			if (SignatureHelperInternal.shouldUseSignature(___card)) {
 				renderHelper(_inst, sb, Settings.WIDTH / 2.0F, Settings.HEIGHT / 2.0F,
 						Fields.signature.get(_inst));
 
 				if (!SCVPanelPatch.Fields.hideDesc.get(_inst)) {
-					SignatureHelper.Style style = SignatureHelper.getStyle(___card);
+					SignatureHelper.Style style = SignatureHelperInternal.getStyle(___card);
 
-					TextureAtlas.AtlasRegion shadow = ___card.description.size() >= 4 || style.descShadowSmallP == null ?
+					String shadow = ___card.description.size() >= 4 || style.descShadowSmallP == null ?
 							style.descShadowP : style.descShadowSmallP;
 
-					if (shadow != null)
-						renderHelper(_inst, sb, Settings.WIDTH / 2.0F, Settings.HEIGHT / 2.0F, shadow);
+					if (shadow != null && !shadow.isEmpty())
+						renderHelper(_inst, sb, Settings.WIDTH / 2.0F, Settings.HEIGHT / 2.0F,
+								SignatureHelperInternal.load(shadow));
 				}
 
 				return SpireReturn.Return(null);
@@ -88,9 +89,9 @@ public class SCVRenderCardPatch {
 	}
 
 	private static TextureAtlas.AtlasRegion getFrameP(AbstractCard card) {
-		SignatureHelper.Style style = SignatureHelper.getStyle(card);
+		SignatureHelper.Style style = SignatureHelperInternal.getStyle(card);
 
-		TextureAtlas.AtlasRegion frame;
+		String frame;
 
 		if (card.type == AbstractCard.CardType.ATTACK) {
 			if (card.rarity == AbstractCard.CardRarity.RARE)
@@ -117,14 +118,14 @@ public class SCVRenderCardPatch {
 				frame = style.cardTypeSkillCommonP;
 		}
 
-		return frame;
+		return frame != null && !frame.isEmpty() ? SignatureHelperInternal.load(frame) : null;
 	}
 
 	@SpirePatch(clz = SingleCardViewPopup.class, method = "renderFrame", paramtypez = {SpriteBatch.class})
 	public static class RenderFramePatch {
 		@SpirePrefixPatch
 		public static SpireReturn<Void> Prefix(SingleCardViewPopup _inst, SpriteBatch sb, AbstractCard ___card) {
-			if (SignatureHelper.shouldUseSignature(___card)) {
+			if (SignatureHelperInternal.shouldUseSignature(___card)) {
 				TextureAtlas.AtlasRegion frame = getFrameP(___card);
 
 				if (frame != null)
@@ -141,7 +142,7 @@ public class SCVRenderCardPatch {
 	public static class RenderCardBannerPatch {
 		@SpirePrefixPatch
 		public static SpireReturn<Void> Prefix(SingleCardViewPopup _inst, SpriteBatch sb, AbstractCard ___card) {
-			if (SignatureHelper.shouldUseSignature(___card))
+			if (SignatureHelperInternal.shouldUseSignature(___card))
 				return SpireReturn.Return();
 
 			return SpireReturn.Continue();
@@ -161,7 +162,7 @@ public class SCVRenderCardPatch {
 		@SpireInsertPatch(locator = Locator.class, localvars = {"label"})
 		public static SpireReturn<Void> Insert(SingleCardViewPopup _inst, SpriteBatch sb,
 											   AbstractCard ___card, String label) {
-			if (SignatureHelper.shouldUseSignature(___card)) {
+			if (SignatureHelperInternal.shouldUseSignature(___card)) {
 				if (getFrameP(___card) != null) {
 					Color cardTypeColor = ReflectionHacks.getPrivateStatic(SingleCardViewPopup.class,
 							"CARD_TYPE_COLOR");
@@ -183,7 +184,7 @@ public class SCVRenderCardPatch {
 	public static class RenderDescriptionPatch {
 		@SpirePrefixPatch
 		public static SpireReturn<Void> Prefix(SingleCardViewPopup _inst, SpriteBatch sb, AbstractCard ___card) {
-			if (SignatureHelper.shouldUseSignature(___card) &&
+			if (SignatureHelperInternal.shouldUseSignature(___card) &&
 					SCVPanelPatch.Fields.hideDesc.get(_inst))
 				return SpireReturn.Return();
 
@@ -195,7 +196,7 @@ public class SCVRenderCardPatch {
 	public static class RenderDescriptionCNPatch {
 		@SpirePrefixPatch
 		public static SpireReturn<Void> Prefix(SingleCardViewPopup _inst, SpriteBatch sb, AbstractCard ___card) {
-			if (SignatureHelper.shouldUseSignature(___card) &&
+			if (SignatureHelperInternal.shouldUseSignature(___card) &&
 					SCVPanelPatch.Fields.hideDesc.get(_inst))
 				return SpireReturn.Return();
 
@@ -216,7 +217,7 @@ public class SCVRenderCardPatch {
 
 		@SpireInsertPatch(locator = Locator.class)
 		public static void Insert(SingleCardViewPopup _inst, SpriteBatch sb, AbstractCard ___card) {
-			if (SignatureHelper.shouldUseSignature(___card.cardsToPreview))
+			if (SignatureHelperInternal.shouldUseSignature(___card.cardsToPreview))
 				SignaturePatch.setPreviewTransparency(___card.cardsToPreview,
 						SCVPanelPatch.Fields.hideDesc.get(_inst) ? 0.0F : 1.0F);
 		}
@@ -231,7 +232,7 @@ public class SCVRenderCardPatch {
 
 			if (MultiCardPreview.multiCardPreview.get(card) != null)
 				for (AbstractCard preview : MultiCardPreview.multiCardPreview.get(card))
-					if (SignatureHelper.shouldUseSignature(preview))
+					if (SignatureHelperInternal.shouldUseSignature(preview))
 						SignaturePatch.setPreviewTransparency(preview,
 								SCVPanelPatch.Fields.hideDesc.get(_inst) ? 0.0F : 1.0F);
 		}
@@ -244,11 +245,9 @@ public class SCVRenderCardPatch {
 		public static void Insert(SingleCardViewPopup _inst, SpriteBatch sb, AbstractCard ___card,
 								  boolean horizontalOnly, @ByRef boolean[] verticalNext,
 								  Vector2 position, Vector2 offset, AbstractCard toPreview) {
-			if (SignatureHelper.hasSignature(___card) && SignatureHelper.isUnlocked(___card.cardID)) {
-				if (___card instanceof AbstractSignatureCard && ((AbstractSignatureCard) ___card).dontAvoidSCVPanel)
-					return;
-
-				if (SignatureHelper.getInfo(___card.cardID).dontAvoidSCVPanel)
+			if (SignatureHelperInternal.hasSignature(___card) &&
+					SignatureHelperInternal.isUnlocked(___card.cardID)) {
+				if (SignatureHelperInternal.dontAvoidSCVPanel(___card))
 					return;
 
 				ArrayList<AbstractCard> previews = MultiCardPreview.multiCardPreview.get(___card);

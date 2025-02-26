@@ -11,7 +11,7 @@ import com.evacipated.cardcrawl.modthespire.lib.SpirePrefixPatch;
 import com.evacipated.cardcrawl.modthespire.lib.SpireReturn;
 import com.megacrit.cardcrawl.cards.AbstractCard;
 import com.megacrit.cardcrawl.screens.SingleCardViewPopup;
-import me.antileaf.signature.utils.SignatureHelper;
+import me.antileaf.signature.utils.internal.SignatureHelperInternal;
 
 @SuppressWarnings("unused")
 public class BaseModPatch {
@@ -19,7 +19,7 @@ public class BaseModPatch {
 	public static class BaseModRenderBgSwitchPatch {
 		@SpirePrefixPatch
 		public static SpireReturn<SpireReturn<?>> Prefix(AbstractCard card, SpriteBatch sb, float x, float y, Color ___renderColor) {
-			if (SignatureHelper.shouldUseSignature(card))
+			if (SignatureHelperInternal.shouldUseSignature(card))
 				return SpireReturn.Return(SpireReturn.Continue());
 			return SpireReturn.Continue();
 		}
@@ -29,7 +29,7 @@ public class BaseModPatch {
 	public static class BaseModRenderBannerSwitchPatch {
 		@SpirePrefixPatch
 		public static SpireReturn<SpireReturn<?>> Prefix(AbstractCard card, SpriteBatch sb, float x, float y, Color ___renderColor) {
-			if (SignatureHelper.shouldUseSignature(card))
+			if (SignatureHelperInternal.shouldUseSignature(card))
 				return SpireReturn.Return(SpireReturn.Continue());
 			return SpireReturn.Continue();
 		}
@@ -41,7 +41,7 @@ public class BaseModPatch {
 		public static SpireReturn<SpireReturn<?>> Prefix(Object _obj, Object sbObj) {
 			AbstractCard card = ReflectionHacks.getPrivate(_obj, SingleCardViewPopup.class, "card");
 
-			if (SignatureHelper.shouldUseSignature(card))
+			if (SignatureHelperInternal.shouldUseSignature(card))
 				return SpireReturn.Return(SpireReturn.Return());
 			return SpireReturn.Continue();
 		}
@@ -51,7 +51,7 @@ public class BaseModPatch {
 	public static class BaseModCustomRenderingPatch {
 		@SpirePrefixPatch
 		public static SpireReturn<SpireReturn<?>> Prefix(SingleCardViewPopup _inst, SpriteBatch sb, AbstractCard ___card, float ___drawScale) {
-			if (SignatureHelper.shouldUseSignature(___card))
+			if (SignatureHelperInternal.shouldUseSignature(___card))
 				return SpireReturn.Return(SpireReturn.Continue());
 			return SpireReturn.Continue();
 		}

@@ -1,6 +1,5 @@
-package me.antileaf.signature.utils;
+package me.antileaf.signature.utils.internal;
 
-import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.megacrit.cardcrawl.core.CardCrawlGame;
 import com.megacrit.cardcrawl.core.Settings;
 import com.megacrit.cardcrawl.dungeons.AbstractDungeon;

@@ -13,21 +13,27 @@ import com.evacipated.cardcrawl.modthespire.lib.SpireSuper;
 import com.megacrit.cardcrawl.cards.AbstractCard;
 import com.megacrit.cardcrawl.core.Settings;
 import com.megacrit.cardcrawl.helpers.FontHelper;
-import me.antileaf.signature.utils.MiscHelper;
 import me.antileaf.signature.utils.SignatureHelper;
+import me.antileaf.signature.utils.internal.MiscHelper;
+import me.antileaf.signature.utils.internal.SignatureHelperInternal;
 
 public abstract class AbstractSignatureCard extends CustomCard {
+	@Deprecated
 	private TextureAtlas.AtlasRegion signaturePortrait = null;
 	public boolean hasSignature = false;
 
 	public SignatureHelper.Style style = SignatureHelper.DEFAULT_STYLE;
+
+	public String parentID = null;
+
+	public boolean hideSCVPanel = false;
+	public boolean dontAvoidSCVPanel = false;
 
 	private boolean signatureHovered = false; // 矢野你诗人？
 	public float signatureHoveredTimer = 0.0F;
 	public float forcedTimer = 0.0F;
 
 	public float previewTransparency = -1.0F;
-	public boolean dontAvoidSCVPanel = false;
 	
 	public AbstractSignatureCard(
 			String id,
@@ -52,8 +58,7 @@ public abstract class AbstractSignatureCard extends CustomCard {
 				target
 		);
 
-		this.signaturePortrait = SignatureHelper.load(this.getSignatureImgPath());
-		if (this.signaturePortrait != null)
+		if (Gdx.files.internal(this.getSignatureImgPath()).exists())
 			this.hasSignature = true;
 	}
 
@@ -72,14 +77,18 @@ public abstract class AbstractSignatureCard extends CustomCard {
 		return this.getSignatureImgPath().replace(".png", "_p.png");
 	}
 
+	public boolean shouldUseSignature() {
+		return true;
+	}
+
 	@Override
 	public void update() {
 		super.update();
 
 		if (this.signatureHovered || (MiscHelper.isInBattle() && this.isHoveredInHand(1.0F))) {
 			this.signatureHoveredTimer += Gdx.graphics.getDeltaTime();
-			if (this.signatureHoveredTimer >= SignatureHelper.FADE_DURATION)
-				this.signatureHoveredTimer = SignatureHelper.FADE_DURATION;
+			if (this.signatureHoveredTimer >= SignatureHelperInternal.FADE_DURATION)
+				this.signatureHoveredTimer = SignatureHelperInternal.FADE_DURATION;
 		}
 		else {
 			this.signatureHoveredTimer -= Gdx.graphics.getDeltaTime();
@@ -95,14 +104,14 @@ public abstract class AbstractSignatureCard extends CustomCard {
 	}
 
 	public void forceToShowDescription() {
-		this.signatureHoveredTimer = SignatureHelper.FORCED_FADE_DURATION;
+		this.signatureHoveredTimer = SignatureHelperInternal.FORCED_FADE_DURATION;
 	}
 
 	private float getSignatureTransparency() {
 		if (this.previewTransparency >= 0.0F)
 			return this.previewTransparency;
 
-		float ret = Math.max(this.signatureHoveredTimer, this.forcedTimer) / SignatureHelper.FADE_DURATION;
+		float ret = Math.max(this.signatureHoveredTimer, this.forcedTimer) / SignatureHelperInternal.FADE_DURATION;
 		if (ret > 1.0F)
 			ret = 1.0F;
 		return ret;
@@ -124,17 +133,17 @@ public abstract class AbstractSignatureCard extends CustomCard {
 	public void renderCardTip(SpriteBatch sb) {
 		super.renderCardTip(sb);
 
-		float transparency = SignatureHelper.shouldUseSignature(this) ?
+		float transparency = SignatureHelperInternal.shouldUseSignature(this) ?
 				this.getSignatureTransparency() : 1.0F;
 
 		if (this.cardsToPreview instanceof AbstractSignatureCard &&
-				SignatureHelper.shouldUseSignature(this.cardsToPreview))
+				SignatureHelperInternal.shouldUseSignature(this.cardsToPreview))
 			((AbstractSignatureCard) this.cardsToPreview).previewTransparency = transparency;
 
 		if (MultiCardPreview.multiCardPreview.get(this) != null) {
 			for (AbstractCard c : MultiCardPreview.multiCardPreview.get(this)) {
 				if (c instanceof AbstractSignatureCard &&
-						SignatureHelper.shouldUseSignature(c))
+						SignatureHelperInternal.shouldUseSignature(c))
 					((AbstractSignatureCard) c).previewTransparency = transparency;
 			}
 		}
@@ -142,7 +151,7 @@ public abstract class AbstractSignatureCard extends CustomCard {
 
 	@SpireOverride
 	protected void renderDescription(SpriteBatch sb) {
-		if (!SignatureHelper.shouldUseSignature(this)) {
+		if (!SignatureHelperInternal.shouldUseSignature(this)) {
 			SpireSuper.call(sb);
 			return;
 		}
@@ -163,7 +172,7 @@ public abstract class AbstractSignatureCard extends CustomCard {
 
 	@SpireOverride
 	protected void renderDescriptionCN(SpriteBatch sb) {
-		if (!SignatureHelper.shouldUseSignature(this)) {
+		if (!SignatureHelperInternal.shouldUseSignature(this)) {
 			SpireSuper.call(sb);
 			return;
 		}
@@ -199,7 +208,7 @@ public abstract class AbstractSignatureCard extends CustomCard {
 
 	@Override
 	public void renderSmallEnergy(SpriteBatch sb, TextureAtlas.AtlasRegion region, float x, float y) {
-		if (SignatureHelper.shouldUseSignature(this)) {
+		if (SignatureHelperInternal.shouldUseSignature(this)) {
 			Color renderColor = this.getRenderColor();
 
 			float alpha = renderColor.a;
@@ -217,17 +226,18 @@ public abstract class AbstractSignatureCard extends CustomCard {
 	protected void renderImage(SpriteBatch sb, boolean hovered, boolean selected) {
 		SpireSuper.call(sb, hovered, selected);
 
-		if (SignatureHelper.shouldUseSignature(this) && this.getSignatureTransparency() > 0.0F) {
+		if (SignatureHelperInternal.shouldUseSignature(this) && this.getSignatureTransparency() > 0.0F) {
 			Color renderColor = this.getRenderColor();
 
 			float alpha = renderColor.a;
 			renderColor.a *= this.getSignatureTransparency();
 
-			TextureAtlas.AtlasRegion shadow = this.description.size() >= 4 || this.style.descShadowSmall == null ?
+			String shadow = this.description.size() >= 4 ||
+					(this.style.descShadowSmall == null || this.style.descShadowSmall.isEmpty()) ?
 					this.style.descShadow : this.style.descShadowSmall;
 
-			if (shadow != null)
-				this.renderHelper(sb, renderColor, shadow,
+			if (shadow != null && !shadow.isEmpty())
+				this.renderHelper(sb, renderColor, SignatureHelperInternal.load(shadow),
 						this.current_x, this.current_y);
 
 			renderColor.a = alpha;
@@ -236,15 +246,15 @@ public abstract class AbstractSignatureCard extends CustomCard {
 
 	@SpireOverride
 	protected void renderCardBg(SpriteBatch sb, float x, float y) {
-		if (!SignatureHelper.shouldUseSignature(this))
+		if (!SignatureHelperInternal.shouldUseSignature(this))
 			SpireSuper.call(sb, x, y);
 	}
 
 	@SpireOverride
 	protected void renderPortrait(SpriteBatch sb) {
-		if (SignatureHelper.shouldUseSignature(this)) {
+		if (SignatureHelperInternal.shouldUseSignature(this)) {
 			sb.setColor(this.getRenderColor());
-			sb.draw(this.signaturePortrait,
+			sb.draw(SignatureHelperInternal.load(this.getSignatureImgPath()),
 					this.current_x - 256.0F,
 					this.current_y - 256.0F,
 					256.0F, 256.0F, 512.0F, 512.0F,
@@ -258,7 +268,7 @@ public abstract class AbstractSignatureCard extends CustomCard {
 
 	@SpireOverride
 	protected void renderJokePortrait(SpriteBatch sb) {
-		if (SignatureHelper.shouldUseSignature(this))
+		if (SignatureHelperInternal.shouldUseSignature(this))
 			this.renderPortrait(sb);
 		else
 			SpireSuper.call(sb);
@@ -266,8 +276,8 @@ public abstract class AbstractSignatureCard extends CustomCard {
 
 	@SpireOverride
 	protected void renderPortraitFrame(SpriteBatch sb, float x, float y) {
-		if (SignatureHelper.shouldUseSignature(this)) {
-			TextureAtlas.AtlasRegion frame;
+		if (SignatureHelperInternal.shouldUseSignature(this)) {
+			String frame;
 
 			if (this.type == AbstractCard.CardType.ATTACK) {
 				if (this.rarity == AbstractCard.CardRarity.RARE)
@@ -294,8 +304,9 @@ public abstract class AbstractSignatureCard extends CustomCard {
 					frame = this.style.cardTypeSkillCommon;
 			}
 
-			if (frame != null)
-				this.renderHelper(sb, this.getRenderColor(), frame, x, y);
+			if (frame != null && !frame.isEmpty())
+				this.renderHelper(sb, this.getRenderColor(),
+						SignatureHelperInternal.load(frame), x, y);
 		}
 		else
 			SpireSuper.call(sb, x, y);
@@ -303,13 +314,13 @@ public abstract class AbstractSignatureCard extends CustomCard {
 
 	@SpireOverride
 	protected void renderBannerImage(SpriteBatch sb, float x, float y) {
-		if (!SignatureHelper.shouldUseSignature(this))
+		if (!SignatureHelperInternal.shouldUseSignature(this))
 			SpireSuper.call(sb, x, y);
 	}
 
 	@SpireOverride
 	protected void renderType(SpriteBatch sb) {
-		if (!SignatureHelper.shouldUseSignature(this)) {
+		if (!SignatureHelperInternal.shouldUseSignature(this)) {
 			SpireSuper.call(sb);
 			return;
 		}

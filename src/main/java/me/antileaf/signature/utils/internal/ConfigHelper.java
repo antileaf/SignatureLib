@@ -1,4 +1,4 @@
-package me.antileaf.signature.utils;
+package me.antileaf.signature.utils.internal;
 
 import basemod.ModLabel;
 import basemod.ModLabeledToggleButton;

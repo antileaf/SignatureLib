@@ -12,8 +12,7 @@ import com.megacrit.cardcrawl.vfx.cardManip.ShowCardBrieflyEffect;
 import javassist.CannotCompileException;
 import javassist.CtBehavior;
 import me.antileaf.signature.card.AbstractSignatureCard;
-import me.antileaf.signature.patches.SignaturePatch;
-import me.antileaf.signature.utils.SignatureHelper;
+import me.antileaf.signature.utils.internal.SignatureHelperInternal;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -27,12 +26,12 @@ public class ForceToShowDescriptionPatch {
 			@SpirePostfixPatch
 			public static void Postfix(GridCardSelectScreen _inst, AbstractCard ___hoveredCard) {
 				if (_inst.confirmScreenUp) {
-					if (SignatureHelper.shouldUseSignature(___hoveredCard))
-						SignatureHelper.forceToShowDescription(___hoveredCard);
+					if (SignatureHelperInternal.shouldUseSignature(___hoveredCard))
+						SignatureHelperInternal.forceToShowDescription(___hoveredCard);
 
 					if (_inst.upgradePreviewCard != null &&
-							SignatureHelper.shouldUseSignature(_inst.upgradePreviewCard))
-						SignatureHelper.forceToShowDescription(_inst.upgradePreviewCard);
+							SignatureHelperInternal.shouldUseSignature(_inst.upgradePreviewCard))
+						SignatureHelperInternal.forceToShowDescription(_inst.upgradePreviewCard);
 				}
 			}
 		}
@@ -44,13 +43,13 @@ public class ForceToShowDescriptionPatch {
 			@SpirePostfixPatch
 			public static void Postfix(HandCardSelectScreen _inst) {
 				_inst.selectedCards.group.forEach(c -> {
-					if (SignatureHelper.shouldUseSignature(c))
-						SignatureHelper.forceToShowDescription(c);
+					if (SignatureHelperInternal.shouldUseSignature(c))
+						SignatureHelperInternal.forceToShowDescription(c);
 				});
 
 				if (_inst.upgradePreviewCard != null &&
-						SignatureHelper.shouldUseSignature(_inst.upgradePreviewCard))
-					SignatureHelper.forceToShowDescription(_inst.upgradePreviewCard);
+						SignatureHelperInternal.shouldUseSignature(_inst.upgradePreviewCard))
+					SignatureHelperInternal.forceToShowDescription(_inst.upgradePreviewCard);
 			}
 		}
 	}
@@ -60,8 +59,8 @@ public class ForceToShowDescriptionPatch {
 	public static class ShowCardBrieflyEffectPatch1 {
 		@SpirePostfixPatch
 		public static void Postfix(ShowCardBrieflyEffect _inst, AbstractCard card) {
-			if (SignatureHelper.shouldUseSignature(card))
-				SignatureHelper.forceToShowDescription(card);
+			if (SignatureHelperInternal.shouldUseSignature(card))
+				SignatureHelperInternal.forceToShowDescription(card);
 		}
 	}
 
@@ -70,8 +69,8 @@ public class ForceToShowDescriptionPatch {
 	public static class ShowCardBrieflyEffectPatch2 {
 		@SpirePostfixPatch
 		public static void Postfix(ShowCardBrieflyEffect _inst, AbstractCard card, float x, float y) {
-			if (SignatureHelper.shouldUseSignature(card))
-				SignatureHelper.forceToShowDescription(card);
+			if (SignatureHelperInternal.shouldUseSignature(card))
+				SignatureHelperInternal.forceToShowDescription(card);
 		}
 	}
 
@@ -80,8 +79,8 @@ public class ForceToShowDescriptionPatch {
 		@SpirePrefixPatch
 		public static void Postfix(ShowCardBrieflyEffect _inst, AbstractCard ___card) {
 			if (_inst.duration - Gdx.graphics.getDeltaTime() < 0.0F &&
-					SignatureHelper.shouldUseSignature(___card))
-				SignatureHelper.forceToShowDescription(___card);
+					SignatureHelperInternal.shouldUseSignature(___card))
+				SignatureHelperInternal.forceToShowDescription(___card);
 		}
 	}
 
@@ -91,8 +90,8 @@ public class ForceToShowDescriptionPatch {
 		@SpirePostfixPatch
 		public static void Postfix(ShowCardAndObtainEffect _inst, AbstractCard card,
 								   float x, float y, boolean convergeCards) {
-			if (SignatureHelper.shouldUseSignature(card))
-				SignatureHelper.forceToShowDescription(card);
+			if (SignatureHelperInternal.shouldUseSignature(card))
+				SignatureHelperInternal.forceToShowDescription(card);
 		}
 	}
 
@@ -101,8 +100,8 @@ public class ForceToShowDescriptionPatch {
 		@SpirePrefixPatch
 		public static void Prefix(ShowCardAndObtainEffect _inst, AbstractCard ___card) {
 			if (_inst.duration - Gdx.graphics.getDeltaTime() < 0.0F &&
-					SignatureHelper.shouldUseSignature(___card))
-				SignatureHelper.forceToShowDescription(___card);
+					SignatureHelperInternal.shouldUseSignature(___card))
+				SignatureHelperInternal.forceToShowDescription(___card);
 		}
 	}
 
@@ -119,7 +118,7 @@ public class ForceToShowDescriptionPatch {
 
 		@SpireInsertPatch(locator = Locator.class, localvars = {"copy"})
 		public static void Insert(AbstractCard _inst, SpriteBatch sb, AbstractCard copy) {
-			if (SignatureHelper.shouldUseSignature(_inst) && SignatureHelper.shouldUseSignature(copy)) {
+			if (SignatureHelperInternal.shouldUseSignature(_inst) && SignatureHelperInternal.shouldUseSignature(copy)) {
 				if (_inst instanceof AbstractSignatureCard && copy instanceof AbstractSignatureCard) {
 					AbstractSignatureCard signatureCard = (AbstractSignatureCard) _inst;
 					AbstractSignatureCard signatureCopy = (AbstractSignatureCard) copy;
