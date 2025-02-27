@@ -1,3 +1,4 @@
 {
-  "enableDebugging": "Enable debugging (use Signatures without unlocking)"
+  "enableDebugging": "Enable debugging (use Signatures without unlocking)",
+  "resetNotices": "Reset new Signature notices"
 }

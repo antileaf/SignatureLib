@@ -13,5 +13,12 @@
       "STS Signature Lib",
       "Allows you to add cool Signature cards to your mod!"
     ]
+  },
+
+  "SignatureLib:New": {
+    "TEXT": [
+      "New Signature!",
+      "New!"
+    ]
   }
 }

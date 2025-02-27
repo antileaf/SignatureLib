@@ -9,6 +9,7 @@ import com.megacrit.cardcrawl.helpers.ImageMaster;
 import com.megacrit.cardcrawl.localization.UIStrings;
 import me.antileaf.signature.utils.internal.ConfigHelper;
 import me.antileaf.signature.utils.internal.MiscHelper;
+import me.antileaf.signature.utils.internal.SignatureHelperInternal;
 
 @SpireInitializer
 public class SignatureLibCore implements EditStringsSubscriber, PostInitializeSubscriber {
@@ -41,5 +42,7 @@ public class SignatureLibCore implements EditStringsSubscriber, PostInitializeSu
 				uiStrings.TEXT[1],
 				ConfigHelper.createConfigPanel()
 		);
+
+		SignatureHelperInternal.initLibraryTypeNotice();
 	}
 }

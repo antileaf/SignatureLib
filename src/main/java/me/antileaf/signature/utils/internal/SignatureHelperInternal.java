@@ -40,6 +40,8 @@ public abstract class SignatureHelperInternal {
 
 	private static final Set<SignatureSubscriber> subscribers = new HashSet<>();
 
+	private static final Map<String, Integer> libraryTypeNotice = new HashMap<>();
+
 	public static TextureAtlas.AtlasRegion load(String path) {
 		Texture t;
 
@@ -97,8 +99,14 @@ public abstract class SignatureHelperInternal {
 	}
 
 	public static void unlock(String id, boolean unlock) {
+		boolean alreadyUnlocked = isUnlocked(id);
+
 		ConfigHelper.setSignatureUnlocked(id, unlock);
 		unlocked.put(id, unlock);
+
+		AbstractCard card = CardLibrary.getCard(id);
+		if (card != null && !hideSCVPanel(card) && alreadyUnlocked != unlock)
+			setSignatureNotice(card, unlock);
 
 		publishOnSignatureUnlocked(id, unlock);
 
@@ -240,6 +248,40 @@ public abstract class SignatureHelperInternal {
 			return getInfo(card.cardID).dontAvoidSCVPanel;
 	}
 
+	public static boolean signatureNotice(AbstractCard card) {
+		if (!hasSignature(card) || !isUnlocked(card.cardID) || hideSCVPanel(card))
+			return false;
+
+		return ConfigHelper.signatureNotice(card.cardID);
+	}
+
+	public static void setSignatureNotice(AbstractCard card, boolean notice) {
+		if (!hasSignature(card) || !isUnlocked(card.cardID) || hideSCVPanel(card) ||
+				notice == signatureNotice(card))
+			return;
+
+		ConfigHelper.setSignatureNotice(card.cardID, notice);
+
+		updateLibraryTypeNotice(card.color, notice);
+	}
+
+	public static void updateLibraryTypeNotice(AbstractCard.CardColor color, boolean notice) {
+		int count = libraryTypeNotice.getOrDefault(color.name(), 0);
+		count += notice ? 1 : -1;
+		if (count < 0)
+			count = 0;
+
+		libraryTypeNotice.put(color.name(), count);
+	}
+
+	public static int getLibraryTypeNotice(AbstractCard.CardColor color) {
+		return libraryTypeNotice.getOrDefault(color.name(), 0);
+	}
+
+	public static boolean hasAnyNotice() {
+		return libraryTypeNotice.values().stream().anyMatch(count -> count > 0);
+	}
+
 	public static void subscribe(SignatureSubscriber subscriber) {
 		subscribers.add(subscriber);
 	}
@@ -260,5 +302,26 @@ public abstract class SignatureHelperInternal {
 
 		subscribers.forEach(subscriber ->
 				subscriber.receiveOnSignatureEnabled(id, enable));
+	}
+
+	public static void initLibraryTypeNotice() {
+		libraryTypeNotice.clear();
+
+		for (AbstractCard card : CardLibrary.getAllCards())
+			if (hasSignature(card) && !hideSCVPanel(card) && ConfigHelper.signatureNotice(card.cardID)) {
+				int count = libraryTypeNotice.getOrDefault(card.color.name(), 0);
+				libraryTypeNotice.put(card.color.name(), count + 1);
+			}
+
+		for (Map.Entry<String, Integer> entry : libraryTypeNotice.entrySet())
+			logger.info("Library type notice: {} {}", entry.getKey(), entry.getValue());
+	}
+
+	public static void resetNotices() {
+		for (AbstractCard card : CardLibrary.getAllCards())
+			if (hasSignature(card) && isUnlocked(card.cardID) && !hideSCVPanel(card))
+				setSignatureNotice(card, true);
+
+		initLibraryTypeNotice();
 	}
 }

@@ -104,9 +104,12 @@ public class SCVPanelPatch {
 			if (Fields.enableHb.get(_inst).clicked) {
 				Fields.enableHb.get(_inst).clicked = false;
 
-				if (SignatureHelperInternal.isUnlocked(___card.cardID))
+				if (SignatureHelperInternal.isUnlocked(___card.cardID)) {
 					SignatureHelperInternal.enable(___card.cardID,
 							!SignatureHelperInternal.isEnabled(___card.cardID));
+
+					SignatureHelperInternal.setSignatureNotice(___card, false);
+				}
 			}
 
 			if (Fields.descHb.get(_inst).justHovered)
@@ -198,6 +201,14 @@ public class SCVPanelPatch {
 						Fields.enableHb.get(_inst).cX - 65.0F * Settings.scale,
 						Fields.enableHb.get(_inst).cY + 10.0F * Settings.scale,
 						Settings.GOLD_COLOR);
+
+			if (SignatureHelperInternal.signatureNotice(___card)) {
+				FontHelper.renderFontCentered(sb, FontHelper.cardTitleFont,
+						CardCrawlGame.languagePack.getUIString("SignatureLib:New").TEXT[1],
+						Fields.enableHb.get(_inst).cX + 65.0F * Settings.scale,
+						Fields.enableHb.get(_inst).cY + 30.0F * Settings.scale,
+						Settings.CREAM_COLOR, 0.6F);
+			}
 
 			if (SignatureHelperInternal.shouldUseSignature(___card)) {
 				sb.setColor(Color.WHITE);

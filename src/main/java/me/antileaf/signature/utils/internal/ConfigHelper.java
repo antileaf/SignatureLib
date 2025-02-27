@@ -1,6 +1,7 @@
 package me.antileaf.signature.utils.internal;
 
 import basemod.ModLabel;
+import basemod.ModLabeledButton;
 import basemod.ModLabeledToggleButton;
 import basemod.ModPanel;
 import com.badlogic.gdx.Gdx;
@@ -9,6 +10,7 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.megacrit.cardcrawl.core.Settings;
 import com.megacrit.cardcrawl.helpers.FontHelper;
+import me.antileaf.signature.utils.SignatureHelper;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -19,10 +21,10 @@ public class ConfigHelper {
 	public static final String ENABLE_DEBUGGING = "enableDebugging";
 	public static final String SIGNATURE_UNLOCKED = "signatureUnlocked_";
 	public static final String SIGNATURE_ENABLED = "signatureEnabled_";
+	public static final String SIGNATURE_NOTICE = "signatureNotice_";
 	
 	public static SpireConfig conf = null;
 	public static Map<String, String> strings;
-	public static ModLabel skinLabel;
 
 	public static void loadConfig() {
 		try {
@@ -62,6 +64,16 @@ public class ConfigHelper {
 		conf.setBool(SIGNATURE_ENABLED + id, enabled);
 		save();
 	}
+
+	public static boolean signatureNotice(String id) {
+		String key = SIGNATURE_NOTICE + id;
+		return !conf.has(key) || conf.getBool(key); // default to true
+	}
+
+	public static void setSignatureNotice(String id, boolean notice) {
+		conf.setBool(SIGNATURE_NOTICE + id, notice);
+		save();
+	}
 	
 	public static void save() {
 		try {
@@ -97,6 +109,21 @@ public class ConfigHelper {
 				}
 		);
 		panel.addUIElement(enableDebuggingButton);
+
+		y -= 150.0F;
+
+		ModLabeledButton resetNoticesButton = new ModLabeledButton(
+				strings.get("resetNotices"),
+				350.0F,
+				y,
+				Settings.CREAM_COLOR,
+				Settings.BLUE_TEXT_COLOR,
+				panel,
+				(button) -> {
+					SignatureHelperInternal.resetNotices();
+				}
+		);
+		panel.addUIElement(resetNoticesButton);
 		
 		return panel;
 	}
