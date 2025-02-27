@@ -42,7 +42,9 @@ public class SignatureLibCore implements EditStringsSubscriber, PostInitializeSu
 				uiStrings.TEXT[1],
 				ConfigHelper.createConfigPanel()
 		);
+	}
 
+	public static void postPostInitialize() {
 		SignatureHelperInternal.initLibraryTypeNotice();
 	}
 }
