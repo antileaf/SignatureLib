@@ -40,6 +40,7 @@ public abstract class SignatureHelperInternal {
 
 	private static final Set<SignatureSubscriber> subscribers = new HashSet<>();
 
+	private static final Set<AbstractCard.CardColor> hasAnySignature = new HashSet<>();
 	private static final Map<String, Integer> libraryTypeNotice = new HashMap<>();
 
 	public static TextureAtlas.AtlasRegion load(String path) {
@@ -120,7 +121,7 @@ public abstract class SignatureHelperInternal {
 			return true;
 
 		if (parent.containsKey(id) && !isUnlocked(parent.get(id)))
-			return true;
+			return false;
 
 		if (!unlocked.containsKey(id))
 			unlocked.put(id, ConfigHelper.isSignatureUnlocked(id));
@@ -282,6 +283,10 @@ public abstract class SignatureHelperInternal {
 		return libraryTypeNotice.values().stream().anyMatch(count -> count > 0);
 	}
 
+	public static boolean hasAnySignature(AbstractCard.CardColor color) {
+		return hasAnySignature.contains(color);
+	}
+
 	public static void subscribe(SignatureSubscriber subscriber) {
 		subscribers.add(subscriber);
 	}
@@ -308,9 +313,13 @@ public abstract class SignatureHelperInternal {
 		libraryTypeNotice.clear();
 
 		for (AbstractCard card : CardLibrary.getAllCards())
-			if (hasSignature(card) && !hideSCVPanel(card) && ConfigHelper.signatureNotice(card.cardID)) {
-				int count = libraryTypeNotice.getOrDefault(card.color.name(), 0);
-				libraryTypeNotice.put(card.color.name(), count + 1);
+			if (hasSignature(card)) {
+				hasAnySignature.add(card.color);
+
+				if (!hideSCVPanel(card) && ConfigHelper.signatureNotice(card.cardID)) {
+					int count = libraryTypeNotice.getOrDefault(card.color.name(), 0);
+					libraryTypeNotice.put(card.color.name(), count + 1);
+				}
 			}
 
 		for (Map.Entry<String, Integer> entry : libraryTypeNotice.entrySet())
