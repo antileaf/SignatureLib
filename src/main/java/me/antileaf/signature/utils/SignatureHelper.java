@@ -35,6 +35,10 @@ public abstract class SignatureHelper {
 		SignatureHelperInternal.addUnlockConditions(jsonFile);
 	}
 
+	public static void addIllustrators(String jsonFile) {
+		SignatureHelperInternal.addIllustrators(jsonFile);
+	}
+
 	public static boolean isUnlocked(String id) {
 		return SignatureHelperInternal.isUnlocked(id);
 	}
