@@ -23,6 +23,10 @@ public abstract class SignatureHelper {
 		SignatureHelperInternal.enable(id, enable);
 	}
 
+	public static boolean shouldUseSignature(AbstractCard card) {
+		return SignatureHelperInternal.shouldUseSignature(card);
+	}
+
 	public static void noDebugging(String id) {
 		SignatureHelperInternal.noDebugging(id);
 	}

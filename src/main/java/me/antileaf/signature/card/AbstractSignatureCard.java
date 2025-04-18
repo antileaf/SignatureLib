@@ -77,7 +77,12 @@ public abstract class AbstractSignatureCard extends CustomCard {
 		return this.getSignatureImgPath().replace(".png", "_p.png");
 	}
 
+//	@Deprecated
 	public boolean shouldUseSignature() {
+		return this.signaturePredicate();
+	}
+
+	public boolean signaturePredicate() {
 		return true;
 	}
 
@@ -107,7 +112,7 @@ public abstract class AbstractSignatureCard extends CustomCard {
 		this.signatureHoveredTimer = SignatureHelperInternal.FORCED_FADE_DURATION;
 	}
 
-	private float getSignatureTransparency() {
+	public float getSignatureTransparency() {
 		if (this.previewTransparency >= 0.0F)
 			return this.previewTransparency;
 
