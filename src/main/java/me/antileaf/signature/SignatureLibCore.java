@@ -1,12 +1,14 @@
 package me.antileaf.signature;
 
 import basemod.BaseMod;
+import basemod.devcommands.ConsoleCommand;
 import basemod.interfaces.EditStringsSubscriber;
 import basemod.interfaces.PostInitializeSubscriber;
 import com.evacipated.cardcrawl.modthespire.lib.SpireInitializer;
 import com.megacrit.cardcrawl.core.CardCrawlGame;
 import com.megacrit.cardcrawl.helpers.ImageMaster;
 import com.megacrit.cardcrawl.localization.UIStrings;
+import me.antileaf.signature.devcommands.SignatureCommand;
 import me.antileaf.signature.utils.internal.ConfigHelper;
 import me.antileaf.signature.utils.internal.MiscHelper;
 import me.antileaf.signature.utils.internal.SignatureHelperInternal;
@@ -21,6 +23,7 @@ public class SignatureLibCore implements EditStringsSubscriber, PostInitializeSu
 	public static void initialize() {
 		new SignatureLibCore();
 		ConfigHelper.loadConfig();
+		ConsoleCommand.addCommand("signature", SignatureCommand.class);
 	}
 
 	@Override
