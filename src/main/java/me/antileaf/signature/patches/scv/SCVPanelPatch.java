@@ -136,10 +136,10 @@ public class SCVPanelPatch {
 		@SpireInsertPatch(rloc = 12)
 		public static void updateInputPatch1(SingleCardViewPopup _inst, Hitbox ___cardHb) {
 			hitBoxesHovered = Fields.enableHb.get(_inst).hovered || Fields.descHb.get(_inst).hovered;
-			___cardHb.hovered = hitBoxesHovered;
+			___cardHb.hovered |= hitBoxesHovered;
 		}
 
-		@SpireInsertPatch(rloc = 24)
+		@SpireInsertPatch(rloc = 27)
 		public static void updateInputPatch2(SingleCardViewPopup _inst, Hitbox ___cardHb) {
 			if (hitBoxesHovered)
 				___cardHb.hovered = false;
