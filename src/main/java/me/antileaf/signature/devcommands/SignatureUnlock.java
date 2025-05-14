@@ -31,9 +31,9 @@ public class SignatureUnlock extends SignatureManipulator {
 
     public ArrayList<String> extraOptions(String[] tokens, int depth) {
         ArrayList<String> result = new ArrayList<>();
-        for (Map.Entry<String, AbstractCard> kvp : CardLibrary.cards.entrySet())
-            if (SignatureHelperInternal.hasSignature(kvp.getValue()) && !SignatureHelper.isUnlocked(kvp.getKey()))
-                result.add(kvp.getKey().replace(' ', '_'));
+        for (Map.Entry<String, AbstractCard> entry : CardLibrary.cards.entrySet())
+            if (SignatureHelperInternal.hasSignature(entry.getValue()) && !SignatureHelper.isUnlocked(entry.getKey()))
+                result.add(entry.getKey().replace(' ', '_'));
         result.add("all");
         return result;
     }

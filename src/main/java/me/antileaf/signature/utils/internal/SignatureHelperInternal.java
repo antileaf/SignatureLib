@@ -9,10 +9,13 @@ import com.megacrit.cardcrawl.cards.AbstractCard;
 import com.megacrit.cardcrawl.core.CardCrawlGame;
 import com.megacrit.cardcrawl.helpers.CardLibrary;
 import com.megacrit.cardcrawl.helpers.ImageMaster;
+import com.megacrit.cardcrawl.screens.GameOverScreen;
 import me.antileaf.signature.card.AbstractSignatureCard;
+import me.antileaf.signature.interfaces.EasyUnlockSubscriber;
 import me.antileaf.signature.interfaces.SignatureSubscriber;
 import me.antileaf.signature.patches.card.SignaturePatch;
 import me.antileaf.signature.patches.card.UnlockConditionPatch;
+import me.antileaf.signature.utils.EasyUnlock;
 import me.antileaf.signature.utils.SignatureHelper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -39,6 +42,8 @@ public abstract class SignatureHelperInternal {
 	private static final Map<String, Set<String>> children = new HashMap<>();
 
 	private static final Set<SignatureSubscriber> subscribers = new HashSet<>();
+
+	private static final Set<EasyUnlockSubscriber> easyUnlockSubscribers = new HashSet<>();
 
 	private static final Set<AbstractCard.CardColor> hasAnySignature = new HashSet<>();
 	private static final Map<String, Integer> libraryTypeNotice = new HashMap<>();
@@ -100,12 +105,16 @@ public abstract class SignatureHelperInternal {
 	}
 
 	public static void unlock(String id, boolean unlock) {
+		AbstractCard card = CardLibrary.getCard(id);
+		if (!hasSignature(card)) {
+			logger.warn("SignatureHelperInternal.unlock(): Card with ID {} does not have a signature", id);
+			return;
+		}
+
 		boolean alreadyUnlocked = isUnlocked(id);
 
 		ConfigHelper.setSignatureUnlocked(id, unlock);
 		unlocked.put(id, unlock);
-
-		AbstractCard card = CardLibrary.getCard(id);
 		if (card != null && !hideSCVPanel(card) && alreadyUnlocked != unlock)
 			setSignatureNotice(card, unlock);
 
@@ -116,6 +125,9 @@ public abstract class SignatureHelperInternal {
 	}
 
 	public static boolean isUnlocked(String id) {
+		if (!hasSignature(CardLibrary.getCard(id)))
+			return false;
+
 		if (ConfigHelper.enableDebugging() && !noDebugging.contains(id) &&
 				noDebuggingPrefixes.stream().noneMatch(id::startsWith))
 			return true;
@@ -202,6 +214,11 @@ public abstract class SignatureHelperInternal {
 	}
 
 	public static void enable(String id, boolean enable) {
+		if (!hasSignature(CardLibrary.getCard(id))) {
+			logger.warn("SignatureHelperInternal.enable(): Card with ID {} does not have a signature", id);
+			return;
+		}
+
 		ConfigHelper.setSignatureEnabled(id, enable);
 		enabled.put(id, enable);
 
@@ -212,6 +229,9 @@ public abstract class SignatureHelperInternal {
 	}
 
 	public static boolean isEnabled(String id) {
+		if (!hasSignature(CardLibrary.getCard(id)))
+			return false;
+
 		if (!enabled.containsKey(id))
 			enabled.put(id, ConfigHelper.isSignatureEnabled(id));
 
@@ -272,13 +292,19 @@ public abstract class SignatureHelperInternal {
 	}
 
 	public static void setSignatureNotice(AbstractCard card, boolean notice) {
-		if (!hasSignature(card) || !isUnlocked(card.cardID) || hideSCVPanel(card) ||
-				notice == signatureNotice(card))
+		if (!hasSignature(card))
 			return;
 
-		ConfigHelper.setSignatureNotice(card.cardID, notice);
+		if (!isUnlocked(card.cardID) || hideSCVPanel(card)) {
+			ConfigHelper.setSignatureNotice(card.cardID, false);
+			return;
+		}
 
-		updateLibraryTypeNotice(card.color, notice);
+		if (notice != signatureNotice(card)) {
+			ConfigHelper.setSignatureNotice(card.cardID, notice);
+
+			updateLibraryTypeNotice(card.color, notice);
+		}
 	}
 
 	public static void updateLibraryTypeNotice(AbstractCard.CardColor color, boolean notice) {
@@ -324,18 +350,55 @@ public abstract class SignatureHelperInternal {
 				subscriber.receiveOnSignatureEnabled(id, enable));
 	}
 
+	public static void registerEasyUnlock(EasyUnlockSubscriber subscriber) {
+		easyUnlockSubscribers.add(subscriber);
+	}
+
+	public static EasyUnlock publishOnGameOver(GameOverScreen screen) {
+		logger.info("Publishing onGameOver");
+
+		boolean duplicate = false;
+		EasyUnlock unlock = null;
+
+		for (EasyUnlockSubscriber subscriber : easyUnlockSubscribers) {
+			EasyUnlock tmp = subscriber.receiveOnGameOver(screen);
+			if (tmp != null) {
+				if (unlock != null) {
+					if (!duplicate)
+						logger.warn("EasyUnlock: multiple unlocks found");
+
+					duplicate = true;
+				}
+
+				unlock = tmp;
+			}
+		}
+
+		return unlock;
+	}
+
 	public static void initLibraryTypeNotice() {
 		libraryTypeNotice.clear();
 
-		for (AbstractCard card : CardLibrary.getAllCards())
+		for (AbstractCard card : CardLibrary.getAllCards()) {
 			if (hasSignature(card)) {
 				hasAnySignature.add(card.color);
 
-				if (!hideSCVPanel(card) && ConfigHelper.signatureNotice(card.cardID)) {
+				if (hideSCVPanel(card) || !isUnlocked(card.cardID)) {
+					if (ConfigHelper.signatureNotice(card.cardID))
+						ConfigHelper.setSignatureNotice(card.cardID, false);
+
+					continue;
+				}
+
+				if (ConfigHelper.signatureNotice(card.cardID)) {
 					int count = libraryTypeNotice.getOrDefault(card.color.name(), 0);
 					libraryTypeNotice.put(card.color.name(), count + 1);
 				}
 			}
+			else if (ConfigHelper.conf.has(ConfigHelper.SIGNATURE_NOTICE + card.cardID))
+				ConfigHelper.removeNotice(card.cardID);
+		}
 
 		for (Map.Entry<String, Integer> entry : libraryTypeNotice.entrySet())
 			logger.info("Library type notice: {} {}", entry.getKey(), entry.getValue());

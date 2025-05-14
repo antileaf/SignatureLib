@@ -26,5 +26,12 @@
     "TEXT": [
       "Signature Only"
     ]
+  },
+
+  "SignatureLib:GameOverScreen": {
+    "TEXT": [
+      "Signature Unlocked!",
+      "Tip: You can switch whether to enable Signature in single card view."
+    ]
   }
 }

@@ -43,6 +43,7 @@ public class ConfigHelper {
 	
 	public static void setEnableDebugging(boolean enableDebugging) {
 		conf.setBool(ENABLE_DEBUGGING, enableDebugging);
+		save();
 	}
 
 	public static boolean isSignatureUnlocked(String id) {
@@ -73,6 +74,14 @@ public class ConfigHelper {
 	public static void setSignatureNotice(String id, boolean notice) {
 		conf.setBool(SIGNATURE_NOTICE + id, notice);
 		save();
+	}
+
+	public static void removeNotice(String id) {
+		String key = SIGNATURE_NOTICE + id;
+		if (conf.has(key)) {
+			conf.remove(key);
+			save();
+		}
 	}
 	
 	public static void save() {
@@ -105,7 +114,7 @@ public class ConfigHelper {
 				(modLabel) -> {},
 				(button) -> {
 					setEnableDebugging(button.enabled);
-					save();
+//					save();
 				}
 		);
 		panel.addUIElement(enableDebuggingButton);

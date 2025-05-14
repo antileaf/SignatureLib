@@ -10,8 +10,8 @@ public abstract class MiscHelper {
 		if (Settings.language == Settings.GameLanguage.ZHS ||
 				Settings.language == Settings.GameLanguage.ZHT)
 			return "zhs";
-		else if (Settings.language == Settings.GameLanguage.JPN)
-			return "jpn";
+//		else if (Settings.language == Settings.GameLanguage.JPN)
+//			return "jpn";
 		else
 			return "eng";
 	}

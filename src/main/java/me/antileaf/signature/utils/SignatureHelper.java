@@ -1,6 +1,7 @@
 package me.antileaf.signature.utils;
 
 import com.megacrit.cardcrawl.cards.AbstractCard;
+import me.antileaf.signature.interfaces.EasyUnlockSubscriber;
 import me.antileaf.signature.interfaces.SignatureSubscriber;
 import me.antileaf.signature.utils.internal.SignatureHelperInternal;
 
@@ -57,6 +58,10 @@ public abstract class SignatureHelper {
 
 	public static void unsubscribe(SignatureSubscriber subscriber) {
 		SignatureHelperInternal.unsubscribe(subscriber);
+	}
+
+	public static void registerEasyUnlock(EasyUnlockSubscriber subscriber) {
+		SignatureHelperInternal.registerEasyUnlock(subscriber);
 	}
 
 	public static class Info {
