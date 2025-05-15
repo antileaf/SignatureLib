@@ -59,6 +59,17 @@ public class SCVRenderCardPatch {
 		}
 	}
 
+	@SpirePatch(clz = SingleCardViewPopup.class, method = "renderCardBack", paramtypez = {SpriteBatch.class})
+	public static class RenderCardBackPatch {
+		@SpirePrefixPatch
+		public static SpireReturn<Void> Prefix(SingleCardViewPopup _inst, SpriteBatch sb, AbstractCard ___card) {
+			if (SignatureHelperInternal.shouldUseSignature(___card))
+				return SpireReturn.Return();
+
+			return SpireReturn.Continue();
+		}
+	}
+
 	@SpirePatch(clz = SingleCardViewPopup.class, method = "renderPortrait", paramtypez = {SpriteBatch.class})
 	public static class RenderPortraitPatch {
 		@SpirePrefixPatch

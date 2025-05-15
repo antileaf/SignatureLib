@@ -55,7 +55,10 @@ public class EasyUnlock {
 	}
 
 	public EasyUnlock IDs(ArrayList<String> IDs) {
-		return this.IDs(IDs.toArray(new String[0]));
+		if (IDs != null)
+			return this.IDs(IDs.toArray(new String[0]));
+		else
+			return this.IDs((String[]) null);
 	}
 
 	public EasyUnlock title(String title) {
