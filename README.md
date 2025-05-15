@@ -4,7 +4,7 @@
 
 ## 关于异画
 
-![与你的日常.png](README/%E4%B8%8E%E4%BD%A0%E7%9A%84%E6%97%A5%E5%B8%B8.png) ![与你的日常_small.png](README/%E4%B8%8E%E4%BD%A0%E7%9A%84%E6%97%A5%E5%B8%B8_small.png)
+![与你的日常.png](README/%E4%B8%8E%E4%BD%A0%E7%9A%84%E6%97%A5%E5%B8%B8.png)
 
 异画牌简单来说就是没有背景，只有全幅大图的卡牌。
 
