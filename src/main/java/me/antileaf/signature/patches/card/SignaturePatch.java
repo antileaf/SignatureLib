@@ -15,6 +15,8 @@ import com.megacrit.cardcrawl.core.Settings;
 import com.megacrit.cardcrawl.helpers.FontHelper;
 import javassist.CannotCompileException;
 import javassist.CtBehavior;
+import javassist.expr.ExprEditor;
+import javassist.expr.MethodCall;
 import me.antileaf.signature.utils.SignatureHelper;
 import me.antileaf.signature.utils.internal.MiscHelper;
 import me.antileaf.signature.utils.internal.SignatureHelperInternal;
@@ -91,10 +93,37 @@ public class SignaturePatch {
 		}
 	}
 
+	@SpirePatch(clz = AbstractCard.class, method = "renderTitle",
+			paramtypez = {SpriteBatch.class})
+	public static class RenderTitlePatch {
+		private static float alpha;
+		private static boolean modified;
+
+		@SpirePrefixPatch
+		public static void Prefix(AbstractCard _inst, SpriteBatch sb) {
+			if (SignatureHelperInternal.usePatch(_inst) &&
+					SignatureHelperInternal.getInfo(_inst.cardID).hideTitle.test(_inst)) {
+				Color renderColor = getRenderColor(_inst);
+				alpha = renderColor.a;
+				modified = true;
+				renderColor.a *= getSignatureTransparency(_inst);
+			}
+			else
+				modified = false;
+		}
+
+		@SpirePostfixPatch
+		public static void Postfix(AbstractCard _inst, SpriteBatch sb) {
+			if (modified)
+				getRenderColor(_inst).a = alpha;
+		}
+	}
+
 	@SpirePatch(clz = AbstractCard.class, method = "renderDescription",
 			paramtypez = {SpriteBatch.class})
 	public static class RenderDescriptionPatch {
 		private static float textColorAlpha, goldColorAlpha;
+		private static boolean modified;
 
 		@SpirePrefixPatch
 		public static SpireReturn<Void> Prefix(AbstractCard _inst, SpriteBatch sb) {
@@ -108,17 +137,20 @@ public class SignaturePatch {
 				Color goldColor = ReflectionHacks.getPrivate(_inst, AbstractCard.class, "goldColor");
 				textColorAlpha = textColor.a;
 				goldColorAlpha = goldColor.a;
+				modified = true;
 
 				textColor.a *= transparency;
 				goldColor.a *= transparency;
 			}
+			else
+				modified = false;
 
 			return SpireReturn.Continue();
 		}
 
 		@SpirePostfixPatch
 		public static void Postfix(AbstractCard _inst, SpriteBatch sb) {
-			if (SignatureHelperInternal.usePatch(_inst) && getSignatureTransparency(_inst) > 0.0F) {
+			if (modified) {
 				Color textColor = ReflectionHacks.getPrivate(_inst, AbstractCard.class, "textColor");
 				Color goldColor = ReflectionHacks.getPrivate(_inst, AbstractCard.class, "goldColor");
 
@@ -161,6 +193,7 @@ public class SignaturePatch {
 			paramtypez = {SpriteBatch.class, TextureAtlas.AtlasRegion.class, float.class, float.class})
 	public static class RenderSmallEnergyPatch {
 		private static float alpha;
+		private static boolean modified;
 
 		@SpirePrefixPatch
 		public static void Prefix(AbstractCard _inst, SpriteBatch sb,
@@ -169,6 +202,7 @@ public class SignaturePatch {
 				Color renderColor = getRenderColor(_inst);
 
 				alpha = renderColor.a;
+				modified = true;
 				renderColor.a *= getSignatureTransparency(_inst);
 			}
 		}
@@ -176,9 +210,8 @@ public class SignaturePatch {
 		@SpirePostfixPatch
 		public static void Postfix(AbstractCard _inst, SpriteBatch sb,
 								   TextureAtlas.AtlasRegion region, float x, float y) {
-			if (SignatureHelperInternal.usePatch(_inst)) {
+			if (modified)
 				getRenderColor(_inst).a = alpha;
-			}
 		}
 	}
 
@@ -292,8 +325,22 @@ public class SignaturePatch {
 			if (SignatureHelperInternal.usePatch(_inst)) {
 				TextureAtlas.AtlasRegion frame = getFrame(_inst);
 
-				if (frame != null)
-					renderHelper(_inst, sb, getRenderColor(_inst), frame, x, y);
+				if (frame != null) {
+					float alpha = -1.0F;
+					boolean modified = false;
+					Color renderColor = getRenderColor(_inst);
+
+					if (SignatureHelperInternal.getInfo(_inst.cardID).hideFrame.test(_inst)) {
+						alpha = renderColor.a;
+						modified = true;
+						renderColor.a *= getSignatureTransparency(_inst);
+					}
+
+					renderHelper(_inst, sb, renderColor, frame, x, y);
+
+					if (modified)
+						renderColor.a = alpha;
+				}
 
 				return SpireReturn.Return();
 			}
@@ -338,17 +385,50 @@ public class SignaturePatch {
 					BitmapFont font = FontHelper.cardTypeFont;
 					font.getData().setScale(_inst.drawScale);
 					getTypeColor(_inst).a = getRenderColor(_inst).a;
-					FontHelper.renderRotatedText(sb, font, text, _inst.current_x,
-							_inst.current_y - 195.0F * _inst.drawScale * Settings.scale,
-							0.0F,
-							-1.0F * _inst.drawScale * Settings.scale,
-							_inst.angle, false, getTypeColor(_inst));
+
+					if (SignatureHelperInternal.getInfo(_inst.cardID).hideFrame.test(_inst))
+						getTypeColor(_inst).a *= getSignatureTransparency(_inst);
+
+					if (getTypeColor(_inst).a > 0.0F) {
+						FontHelper.renderRotatedText(sb, font, text, _inst.current_x,
+								_inst.current_y - 195.0F * _inst.drawScale * Settings.scale,
+								0.0F,
+								-1.0F * _inst.drawScale * Settings.scale,
+								_inst.angle, false, getTypeColor(_inst));
+					}
 				}
 
 				return SpireReturn.Return();
 			}
 
 			return SpireReturn.Continue();
+		}
+	}
+
+	@SpirePatch(clz = AbstractCard.class, method = "renderEnergy",
+			paramtypez = {SpriteBatch.class})
+	public static class RenderEnergyPatch {
+		public static TextureAtlas.AtlasRegion handle(AbstractCard card, TextureAtlas.AtlasRegion original) {
+			if (SignatureHelperInternal.usePatch(card)) {
+				String energyOrb = SignatureHelperInternal.getInfo(card.cardID).energyOrb.apply(card);
+
+				if (energyOrb != null)
+					return SignatureHelperInternal.load(energyOrb);
+			}
+
+			return original;
+		}
+
+		@SpireInstrumentPatch
+		public static ExprEditor Instrument() {
+			return new ExprEditor() {
+				@Override
+				public void edit(MethodCall m) throws CannotCompileException {
+					if (m.getMethodName().equals("renderHelper"))
+						m.replace("{ $3 = " + RenderEnergyPatch.class.getName() +
+								".handle($0, $3); $_ = $proceed($$); }");
+				}
+			};
 		}
 	}
 

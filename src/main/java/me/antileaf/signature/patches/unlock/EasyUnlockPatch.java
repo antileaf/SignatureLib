@@ -37,7 +37,7 @@ public class EasyUnlockPatch {
 			EasyUnlock easyUnlock = SignatureHelperInternal.publishOnGameOver(_inst);
 
 			if (ReflectionHacks.getPrivate(_inst, GameOverScreen.class, "unlockBundle") == null &&
-					easyUnlock != null) {
+					easyUnlock != null && easyUnlock.cards != null && !easyUnlock.cards.isEmpty()) {
 				ArrayList<AbstractUnlock> unlocks = new ArrayList<>();
 
 				for (AbstractCard card : easyUnlock.cards) {

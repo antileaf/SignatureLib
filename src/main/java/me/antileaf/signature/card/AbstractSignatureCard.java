@@ -1,10 +1,12 @@
 package me.antileaf.signature.card;
 
+import basemod.BaseMod;
 import basemod.ReflectionHacks;
 import basemod.abstracts.CustomCard;
 import basemod.patches.com.megacrit.cardcrawl.cards.AbstractCard.MultiCardPreview;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
@@ -18,6 +20,11 @@ import me.antileaf.signature.utils.internal.MiscHelper;
 import me.antileaf.signature.utils.internal.SignatureHelperInternal;
 
 public abstract class AbstractSignatureCard extends CustomCard {
+	private static Texture getTextureFromString(String textureString) {
+		return ReflectionHacks.privateMethod(CustomCard.class, "getTextureFromString", String.class)
+				.invoke(null, textureString);
+	}
+
 	@Deprecated
 	private TextureAtlas.AtlasRegion signaturePortrait = null;
 	public boolean hasSignature = false;
@@ -77,6 +84,26 @@ public abstract class AbstractSignatureCard extends CustomCard {
 		return this.getSignatureImgPath().replace(".png", "_p.png");
 	}
 
+	public String getSignatureEnergyOrbPath() {
+		return null;
+	}
+
+	public String getSignatureEnergyOrbPortraitPath() {
+		String energyOrb = this.getSignatureEnergyOrbPath();
+		if (energyOrb == null)
+			return null;
+
+		return energyOrb.replace("512", "1024");
+	}
+
+	public boolean hideTitle() {
+		return false;
+	}
+
+	public boolean hideFrame() {
+		return false;
+	}
+
 //	@Deprecated
 	public boolean shouldUseSignature() {
 		return this.signaturePredicate();
@@ -84,6 +111,27 @@ public abstract class AbstractSignatureCard extends CustomCard {
 
 	public boolean signaturePredicate() {
 		return true;
+	}
+
+	@Override
+	public Texture getOrbSmallTexture() {
+		if (SignatureHelperInternal.shouldUseSignature(this)) {
+			String orb = this.getSignatureEnergyOrbPath();
+			if (orb != null)
+				return getTextureFromString(orb);
+		}
+
+		return super.getOrbSmallTexture();
+	}
+
+	public Texture getOrbLargeTexture() {
+		if (SignatureHelperInternal.shouldUseSignature(this)) {
+			String orbP = this.getSignatureEnergyOrbPortraitPath();
+			if (orbP != null)
+				return getTextureFromString(orbP);
+		}
+
+		return super.getOrbLargeTexture();
 	}
 
 	@Override
@@ -151,6 +199,25 @@ public abstract class AbstractSignatureCard extends CustomCard {
 						SignatureHelperInternal.shouldUseSignature(c))
 					((AbstractSignatureCard) c).previewTransparency = transparency;
 			}
+		}
+	}
+
+	@SpireOverride
+	protected void renderTitle(SpriteBatch sb) {
+		if (!SignatureHelperInternal.shouldUseSignature(this) || !this.hideTitle()) {
+			SpireSuper.call(sb);
+			return;
+		}
+
+		if (this.getSignatureTransparency() > 0.0F) {
+			Color renderColor = this.getRenderColor();
+
+			float alpha = renderColor.a;
+			renderColor.a *= this.getSignatureTransparency();
+
+			SpireSuper.call(sb);
+
+			renderColor.a = alpha;
 		}
 	}
 
@@ -309,9 +376,22 @@ public abstract class AbstractSignatureCard extends CustomCard {
 					frame = this.style.cardTypeSkillCommon;
 			}
 
-			if (frame != null && !frame.isEmpty())
+			if (frame != null && !frame.isEmpty()) {
+				float alpha = -1.0F;
+				boolean modified = false;
+
+				if (this.hideFrame()) {
+					alpha = this.getRenderColor().a;
+					modified = true;
+					this.getRenderColor().a *= this.getSignatureTransparency();
+				}
+
 				this.renderHelper(sb, this.getRenderColor(),
 						SignatureHelperInternal.load(frame), x, y);
+
+				if (modified)
+					this.getRenderColor().a = alpha;
+			}
 		}
 		else
 			SpireSuper.call(sb, x, y);
@@ -347,10 +427,16 @@ public abstract class AbstractSignatureCard extends CustomCard {
 		BitmapFont font = FontHelper.cardTypeFont;
 		font.getData().setScale(this.drawScale);
 		this.getTypeColor().a = this.getRenderColor().a;
-		FontHelper.renderRotatedText(sb, font, text, this.current_x,
-				this.current_y - 195.0F * this.drawScale * Settings.scale,
-				0.0F,
-				-1.0F * this.drawScale * Settings.scale,
-				this.angle, false, this.getTypeColor());
+
+		if (this.hideFrame())
+			this.getTypeColor().a *= this.getSignatureTransparency();
+
+		if (this.getTypeColor().a > 0.0F) {
+			FontHelper.renderRotatedText(sb, font, text, this.current_x,
+					this.current_y - 195.0F * this.drawScale * Settings.scale,
+					0.0F,
+					-1.0F * this.drawScale * Settings.scale,
+					this.angle, false, this.getTypeColor());
+		}
 	}
 }

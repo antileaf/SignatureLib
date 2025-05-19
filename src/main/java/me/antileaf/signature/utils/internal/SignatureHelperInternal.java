@@ -263,6 +263,20 @@ public abstract class SignatureHelperInternal {
 			SignaturePatch.forceToShowDescription(card);
 	}
 
+	public static boolean hideTitle(AbstractCard card) {
+		if (card instanceof AbstractSignatureCard)
+			return ((AbstractSignatureCard) card).hideTitle();
+		else
+			return getInfo(card.cardID).hideTitle.test(card);
+	}
+
+	public static boolean hideFrame(AbstractCard card) {
+		if (card instanceof AbstractSignatureCard)
+			return ((AbstractSignatureCard) card).hideFrame();
+		else
+			return getInfo(card.cardID).hideFrame.test(card);
+	}
+
 	public static boolean hideSCVPanel(AbstractCard card) {
 		if (card instanceof AbstractSignatureCard) {
 			if (((AbstractSignatureCard) card).parentID != null)

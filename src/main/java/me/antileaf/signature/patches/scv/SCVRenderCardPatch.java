@@ -34,6 +34,7 @@ public class SCVRenderCardPatch {
 	@SpirePatch(clz = SingleCardViewPopup.class, method = SpirePatch.CLASS)
 	public static class Fields {
 		public static SpireField<TextureAtlas.AtlasRegion> signature = new SpireField<>(() -> null);
+		public static SpireField<TextureAtlas.AtlasRegion> energyOrb = new SpireField<>(() -> null);
 	}
 
 	@SpirePatch(clz = SingleCardViewPopup.class, method = "loadPortraitImg", paramtypez = {})
@@ -45,7 +46,12 @@ public class SCVRenderCardPatch {
 						((AbstractSignatureCard) ___card).getSignaturePortraitImgPath() :
 						SignatureHelperInternal.getInfo(___card.cardID).portrait.apply(___card);
 
+				String orb = ___card instanceof AbstractSignatureCard ?
+						((AbstractSignatureCard) ___card).getSignatureEnergyOrbPortraitPath() :
+						SignatureHelperInternal.getInfo(___card.cardID).energyOrbP.apply(___card);
+
 				Fields.signature.set(_inst, SignatureHelperInternal.load(sig));
+				Fields.energyOrb.set(_inst, orb == null ? null : SignatureHelperInternal.load(orb));
 			}
 		}
 	}
@@ -137,10 +143,12 @@ public class SCVRenderCardPatch {
 		@SpirePrefixPatch
 		public static SpireReturn<Void> Prefix(SingleCardViewPopup _inst, SpriteBatch sb, AbstractCard ___card) {
 			if (SignatureHelperInternal.shouldUseSignature(___card)) {
-				TextureAtlas.AtlasRegion frame = getFrameP(___card);
+				if (!(SignatureHelperInternal.hideFrame(___card) && SCVPanelPatch.Fields.hideDesc.get(_inst))) {
+					TextureAtlas.AtlasRegion frame = getFrameP(___card);
 
-				if (frame != null)
-					renderHelper(_inst, sb, Settings.WIDTH / 2.0F, Settings.HEIGHT / 2.0F, frame);
+					if (frame != null)
+						renderHelper(_inst, sb, Settings.WIDTH / 2.0F, Settings.HEIGHT / 2.0F, frame);
+				}
 
 				return SpireReturn.Return();
 			}
@@ -175,13 +183,15 @@ public class SCVRenderCardPatch {
 											   AbstractCard ___card, String label) {
 			if (SignatureHelperInternal.shouldUseSignature(___card)) {
 				if (getFrameP(___card) != null) {
-					Color cardTypeColor = ReflectionHacks.getPrivateStatic(SingleCardViewPopup.class,
-							"CARD_TYPE_COLOR");
+					if (!(SignatureHelperInternal.hideFrame(___card) && SCVPanelPatch.Fields.hideDesc.get(_inst))) {
+						Color cardTypeColor = ReflectionHacks.getPrivateStatic(SingleCardViewPopup.class,
+								"CARD_TYPE_COLOR");
 
-					FontHelper.renderFontCentered(sb, FontHelper.panelNameFont, label,
-							(float) Settings.WIDTH / 2.0F,
-							(float) Settings.HEIGHT / 2.0F - 392.0F * Settings.scale,
-							cardTypeColor);
+						FontHelper.renderFontCentered(sb, FontHelper.panelNameFont, label,
+								(float) Settings.WIDTH / 2.0F,
+								(float) Settings.HEIGHT / 2.0F - 392.0F * Settings.scale,
+								cardTypeColor);
+					}
 				}
 
 				return SpireReturn.Return();
@@ -212,6 +222,30 @@ public class SCVRenderCardPatch {
 				return SpireReturn.Return();
 
 			return SpireReturn.Continue();
+		}
+	}
+
+	@SpirePatch(clz = SingleCardViewPopup.class, method = "renderTitle", paramtypez = {SpriteBatch.class})
+	public static class RenderTitlePatch {
+		@SpirePrefixPatch
+		public static SpireReturn<Void> Prefix(SingleCardViewPopup _inst, SpriteBatch sb, AbstractCard ___card) {
+			if (SignatureHelperInternal.shouldUseSignature(___card) &&
+					SignatureHelperInternal.hideTitle(___card) && SCVPanelPatch.Fields.hideDesc.get(_inst))
+				return SpireReturn.Return();
+
+			return SpireReturn.Continue();
+		}
+	}
+
+	@SpirePatch(clz = SingleCardViewPopup.class, method = "renderCost", paramtypez = {SpriteBatch.class})
+	public static class RenderCostPatch {
+		@SpireInsertPatch(rloc = 24, localvars = {"tmpImg"})
+		public static void Insert(SingleCardViewPopup _inst, SpriteBatch sb, AbstractCard ___card,
+								  @ByRef TextureAtlas.AtlasRegion[] tmpImg) {
+			if (SignatureHelperInternal.usePatch(___card)) {
+				if (Fields.energyOrb.get(_inst) != null)
+					tmpImg[0] = Fields.energyOrb.get(_inst);
+			}
 		}
 	}
 
