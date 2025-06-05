@@ -1,6 +1,5 @@
 package me.antileaf.signature.utils.internal;
 
-import basemod.ModLabel;
 import basemod.ModLabeledButton;
 import basemod.ModLabeledToggleButton;
 import basemod.ModPanel;
@@ -10,7 +9,6 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.megacrit.cardcrawl.core.Settings;
 import com.megacrit.cardcrawl.helpers.FontHelper;
-import me.antileaf.signature.utils.SignatureHelper;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
