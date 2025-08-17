@@ -17,6 +17,7 @@ import javassist.CannotCompileException;
 import javassist.CtBehavior;
 import javassist.expr.ExprEditor;
 import javassist.expr.MethodCall;
+import me.antileaf.signature.card.AbstractSignatureCard;
 import me.antileaf.signature.utils.SignatureHelper;
 import me.antileaf.signature.utils.internal.MiscHelper;
 import me.antileaf.signature.utils.internal.SignatureHelperInternal;
@@ -363,38 +364,41 @@ public class SignaturePatch {
 	}
 
     @SpirePatch2(clz = AbstractCard.class, method = "renderType")
-    public static class RenderTypePatch {
-        @SpireInsertPatch(locator = Locator.class, localvars = { "text", "font" })
-        public static SpireReturn<Void> Insert(AbstractCard __instance, SpriteBatch sb,
-                String text, BitmapFont font) {
+	public static class RenderTypePatch {
+		@SpireInsertPatch(locator = Locator.class, localvars = { "text", "font" })
+		public static SpireReturn<Void> Insert(AbstractCard __instance, SpriteBatch sb,
+											   String text, BitmapFont font) {
 
-            if (!SignatureHelperInternal.usePatch(__instance))
-                return SpireReturn.Continue();
+			if (!SignatureHelperInternal.shouldUseSignature(__instance))
+				return SpireReturn.Continue();
 
-            if (getFrame(__instance) != null) {
-                Color typeColor = ReflectionHacks.getPrivate(__instance, AbstractCard.class, "typeColor");
-                Color renderColor = ReflectionHacks.getPrivate(__instance, AbstractCard.class, "renderColor");
+			if (getFrame(__instance) != null) {
+				Color typeColor = ReflectionHacks.getPrivate(__instance, AbstractCard.class, "typeColor");
+				Color renderColor = ReflectionHacks.getPrivate(__instance, AbstractCard.class, "renderColor");
 
-                typeColor.a = renderColor.a;
-                if ((SignatureHelperInternal.getInfo(__instance.cardID)).hideFrame.test(__instance))
-                    typeColor.a *= getSignatureTransparency(__instance);
-                if (typeColor.a > 0.0F)
-                    FontHelper.renderRotatedText(sb, font, text, __instance.current_x,
-                            __instance.current_y - 195.0F * __instance.drawScale * Settings.scale,
-                            0.0F, -1.0F * __instance.drawScale * Settings.scale, __instance.angle,
-                            false, typeColor);
-            }
+				typeColor.a = renderColor.a;
 
-            return SpireReturn.Return();
-        }
+				if (__instance instanceof AbstractSignatureCard ?
+						((AbstractSignatureCard) __instance).hideFrame() :
+						SignatureHelperInternal.getInfo(__instance.cardID).hideFrame.test(__instance))
+					typeColor.a *= getSignatureTransparency(__instance);
+				if (typeColor.a > 0.0F)
+					FontHelper.renderRotatedText(sb, font, text, __instance.current_x,
+							__instance.current_y - 195.0F * __instance.drawScale * Settings.scale,
+							0.0F, -1.0F * __instance.drawScale * Settings.scale, __instance.angle,
+							false, typeColor);
+			}
 
-        private static class Locator extends SpireInsertLocator {
-            @Override
-            public int[] Locate(CtBehavior ctMethodToPatch) throws Exception {
-                return LineFinder.findInOrder(ctMethodToPatch,
-                        new Matcher.MethodCallMatcher(FontHelper.class, "renderRotatedText"));
-            }
-        }
+			return SpireReturn.Return();
+		}
+
+		private static class Locator extends SpireInsertLocator {
+			@Override
+			public int[] Locate(CtBehavior ctMethodToPatch) throws Exception {
+				return LineFinder.findInOrder(ctMethodToPatch,
+						new Matcher.MethodCallMatcher(FontHelper.class, "renderRotatedText"));
+			}
+		}
 	}
 
 	@SpirePatch(clz = AbstractCard.class, method = "renderEnergy",

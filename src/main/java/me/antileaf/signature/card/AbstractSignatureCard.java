@@ -403,40 +403,41 @@ public abstract class AbstractSignatureCard extends CustomCard {
 			SpireSuper.call(sb, x, y);
 	}
 
-	@SpireOverride
-	protected void renderType(SpriteBatch sb) {
-		if (!SignatureHelperInternal.shouldUseSignature(this)) {
-			SpireSuper.call(sb);
-			return;
-		}
+	// Moved to SignaturePatch.
+	// @SpireOverride
+	// protected void renderType(SpriteBatch sb) {
+	// 	if (!SignatureHelperInternal.shouldUseSignature(this)) {
+	// 		SpireSuper.call(sb);
+	// 		return;
+	// 	}
 
-		String text;
-		if (this.type == AbstractCard.CardType.ATTACK)
-			text = AbstractCard.TEXT[0];
-		else if (this.type == AbstractCard.CardType.SKILL)
-			text = AbstractCard.TEXT[1];
-		else if (this.type == AbstractCard.CardType.POWER)
-			text = AbstractCard.TEXT[2];
-		else if (this.type == AbstractCard.CardType.CURSE)
-			text = AbstractCard.TEXT[3];
-		else if (this.type == AbstractCard.CardType.STATUS)
-			text = AbstractCard.TEXT[7];
-		else
-			text = AbstractCard.TEXT[5];
+	// 	String text;
+	// 	if (this.type == AbstractCard.CardType.ATTACK)
+	// 		text = AbstractCard.TEXT[0];
+	// 	else if (this.type == AbstractCard.CardType.SKILL)
+	// 		text = AbstractCard.TEXT[1];
+	// 	else if (this.type == AbstractCard.CardType.POWER)
+	// 		text = AbstractCard.TEXT[2];
+	// 	else if (this.type == AbstractCard.CardType.CURSE)
+	// 		text = AbstractCard.TEXT[3];
+	// 	else if (this.type == AbstractCard.CardType.STATUS)
+	// 		text = AbstractCard.TEXT[7];
+	// 	else
+	// 		text = AbstractCard.TEXT[5];
 
-		BitmapFont font = FontHelper.cardTypeFont;
-		font.getData().setScale(this.drawScale);
-		this.getTypeColor().a = this.getRenderColor().a;
+	// 	BitmapFont font = FontHelper.cardTypeFont;
+	// 	font.getData().setScale(this.drawScale);
+	// 	this.getTypeColor().a = this.getRenderColor().a;
 
-		if (this.hideFrame())
-			this.getTypeColor().a *= this.getSignatureTransparency();
+	// 	if (this.hideFrame())
+	// 		this.getTypeColor().a *= this.getSignatureTransparency();
 
-		if (this.getTypeColor().a > 0.0F) {
-			FontHelper.renderRotatedText(sb, font, text, this.current_x,
-					this.current_y - 195.0F * this.drawScale * Settings.scale,
-					0.0F,
-					-1.0F * this.drawScale * Settings.scale,
-					this.angle, false, this.getTypeColor());
-		}
-	}
+	// 	if (this.getTypeColor().a > 0.0F) {
+	// 		FontHelper.renderRotatedText(sb, font, text, this.current_x,
+	// 				this.current_y - 195.0F * this.drawScale * Settings.scale,
+	// 				0.0F,
+	// 				-1.0F * this.drawScale * Settings.scale,
+	// 				this.angle, false, this.getTypeColor());
+	// 	}
+	// }
 }
