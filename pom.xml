@@ -6,7 +6,7 @@
 
   <groupId>me.antileaf</groupId>
   <artifactId>signature-lib</artifactId>
-  <version>5.14.2025</version>
+  <version>6.0.0</version>
 
   <properties>
     <maven.compiler.source>1.8</maven.compiler.source>

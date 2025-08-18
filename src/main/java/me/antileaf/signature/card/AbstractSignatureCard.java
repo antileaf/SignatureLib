@@ -405,7 +405,7 @@ public abstract class AbstractSignatureCard extends CustomCard {
 
 	// Moved to SignaturePatch.
 	@Deprecated // @SpireOverride
-	protected void renderType(SpriteBatch sb) {
+	private void renderType(SpriteBatch sb) {
 		if (!SignatureHelperInternal.shouldUseSignature(this)) {
 			SpireSuper.call(sb);
 			return;

@@ -62,6 +62,8 @@ public class SCVRenderCardPatch {
 		public static void Postfix(SingleCardViewPopup _inst) {
 			if (Fields.signature.get(_inst) != null)
 				Fields.signature.set(_inst, null);
+			if (Fields.energyOrb.get(_inst) != null)
+				Fields.energyOrb.set(_inst, null);
 		}
 	}
 
