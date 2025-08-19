@@ -63,6 +63,9 @@ public class SignaturePatch {
 	}
 
 	private static float getSignatureTransparency(AbstractCard card) {
+		if (card instanceof AbstractSignatureCard)
+			return ((AbstractSignatureCard) card).getSignatureTransparency();
+
 		if (Fields.previewTransparency.get(card) >= 0.0F)
 			return Fields.previewTransparency.get(card);
 
@@ -376,11 +379,7 @@ public class SignaturePatch {
 				Color typeColor = ReflectionHacks.getPrivate(__instance, AbstractCard.class, "typeColor");
 				Color renderColor = ReflectionHacks.getPrivate(__instance, AbstractCard.class, "renderColor");
 
-				typeColor.a = renderColor.a;
-
-				if (__instance instanceof AbstractSignatureCard ?
-						((AbstractSignatureCard) __instance).hideFrame() :
-						SignatureHelperInternal.getInfo(__instance.cardID).hideFrame.test(__instance))
+				if (SignatureHelperInternal.hideFrame(__instance))
 					typeColor.a *= getSignatureTransparency(__instance);
 				if (typeColor.a > 0.0F)
 					FontHelper.renderRotatedText(sb, font, text, __instance.current_x,
