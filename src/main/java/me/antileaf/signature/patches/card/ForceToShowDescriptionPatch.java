@@ -78,7 +78,7 @@ public class ForceToShowDescriptionPatch {
 	public static class ShowCardBrieflyEffectPatch3 {
 		@SpirePrefixPatch
 		public static void Postfix(ShowCardBrieflyEffect _inst, AbstractCard ___card) {
-			if (_inst.duration - Gdx.graphics.getDeltaTime() < 0.0F &&
+			if (_inst.duration - Gdx.graphics.getDeltaTime() > 0.0F &&
 					SignatureHelperInternal.shouldUseSignature(___card))
 				SignatureHelperInternal.forceToShowDescription(___card);
 		}
@@ -99,7 +99,7 @@ public class ForceToShowDescriptionPatch {
 	public static class ShowCardAndObtainEffectPatch2 {
 		@SpirePrefixPatch
 		public static void Prefix(ShowCardAndObtainEffect _inst, AbstractCard ___card) {
-			if (_inst.duration - Gdx.graphics.getDeltaTime() < 0.0F &&
+			if (_inst.duration - Gdx.graphics.getDeltaTime() > 0.0F &&
 					SignatureHelperInternal.shouldUseSignature(___card))
 				SignatureHelperInternal.forceToShowDescription(___card);
 		}

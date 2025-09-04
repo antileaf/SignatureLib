@@ -157,7 +157,7 @@ public abstract class AbstractSignatureCard extends CustomCard {
 	}
 
 	public void forceToShowDescription() {
-		this.signatureHoveredTimer = SignatureHelperInternal.FORCED_FADE_DURATION;
+		this.forcedTimer = SignatureHelperInternal.FORCED_FADE_DURATION;
 	}
 
 	public float getSignatureTransparency() {
