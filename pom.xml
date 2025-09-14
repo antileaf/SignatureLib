@@ -6,7 +6,7 @@
 
   <groupId>me.antileaf</groupId>
   <artifactId>signature-lib</artifactId>
-  <version>6.0.1</version>
+  <version>6.0.1-fix</version>
 
   <properties>
     <maven.compiler.source>1.8</maven.compiler.source>
@@ -52,6 +52,14 @@
 <!--      <scope>system</scope>-->
 <!--      <systemPath>${Steam.path}/workshop/content/646570/1609158507/StSLib.jar</systemPath>-->
 <!--    </dependency>-->
+
+    <dependency>
+	  <groupId>AKDream</groupId>
+	  <artifactId>AKDsMoreRelics</artifactId>
+	  <version>newest</version>
+	  <scope>system</scope>
+      <systemPath>${Steam.path}/workshop/content/646570/2901671450/AKDsMoreRelics.jar</systemPath>
+	</dependency>
 
     <dependency>
         <groupId>org.jetbrains</groupId>
