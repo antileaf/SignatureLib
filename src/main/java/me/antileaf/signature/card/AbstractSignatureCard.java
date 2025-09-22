@@ -18,8 +18,12 @@ import com.megacrit.cardcrawl.helpers.FontHelper;
 import me.antileaf.signature.utils.SignatureHelper;
 import me.antileaf.signature.utils.internal.MiscHelper;
 import me.antileaf.signature.utils.internal.SignatureHelperInternal;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public abstract class AbstractSignatureCard extends CustomCard {
+	private static final Logger logger = LogManager.getLogger(AbstractSignatureCard.class.getName());
+	
 	private static Texture getTextureFromString(String textureString) {
 		return ReflectionHacks.privateMethod(CustomCard.class, "getTextureFromString", String.class)
 				.invoke(null, textureString);
@@ -64,12 +68,17 @@ public abstract class AbstractSignatureCard extends CustomCard {
 				rarity,
 				target
 		);
+		
+		String signatureImg = this.getSignatureImgPath();
 
-		if (Gdx.files.internal(this.getSignatureImgPath()).exists())
+		if (signatureImg != null && Gdx.files.internal(signatureImg).exists())
 			this.hasSignature = true;
 	}
 
 	public String getSignatureImgPath() {
+		if (this.textureImg == null)
+			return null;
+		
 		if (this.textureImg.contains("/cards/"))
 			return this.textureImg.replace(".png", "_s.png")
 					.replace("/cards/", "/signature/");
@@ -81,7 +90,11 @@ public abstract class AbstractSignatureCard extends CustomCard {
 	}
 
 	public String getSignaturePortraitImgPath() {
-		return this.getSignatureImgPath().replace(".png", "_p.png");
+		String signatureImg = this.getSignatureImgPath();
+		if (signatureImg == null)
+			return null;
+		
+		return signatureImg.replace(".png", "_p.png");
 	}
 
 	public String getSignatureEnergyOrbPath() {
@@ -326,7 +339,14 @@ public abstract class AbstractSignatureCard extends CustomCard {
 	protected void renderPortrait(SpriteBatch sb) {
 		if (SignatureHelperInternal.shouldUseSignature(this)) {
 			sb.setColor(this.getRenderColor());
-			sb.draw(SignatureHelperInternal.load(this.getSignatureImgPath()),
+			
+			String signatureImg = this.getSignatureImgPath();
+			if (signatureImg == null) {
+				logger.error("Signature portrait path is null for card {}!", this.cardID);
+				return;
+			}
+			
+			sb.draw(SignatureHelperInternal.load(signatureImg),
 					this.current_x - 256.0F,
 					this.current_y - 256.0F,
 					256.0F, 256.0F, 512.0F, 512.0F,

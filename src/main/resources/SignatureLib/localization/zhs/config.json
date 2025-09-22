@@ -1,4 +1,5 @@
 {
   "enableDebugging": "启用调试功能（无需解锁即可使用异画）",
+  "clearNotices": "清除新异画提醒",
   "resetNotices": "重置新异画提醒"
 }

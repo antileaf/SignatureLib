@@ -425,4 +425,12 @@ public abstract class SignatureHelperInternal {
 
 		initLibraryTypeNotice();
 	}
+	
+	public static void clearNotices() {
+		for (AbstractCard card : CardLibrary.getAllCards())
+			if (hasSignature(card) && isUnlocked(card.cardID) && !hideSCVPanel(card))
+				setSignatureNotice(card, false);
+
+		initLibraryTypeNotice();
+	}
 }

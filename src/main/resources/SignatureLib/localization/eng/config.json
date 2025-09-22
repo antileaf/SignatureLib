@@ -1,4 +1,5 @@
 {
   "enableDebugging": "Enable debugging (use Signatures without unlocking)",
+  "clearNotices": "Clear new Signature notices",
   "resetNotices": "Reset new Signature notices"
 }

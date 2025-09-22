@@ -116,15 +116,30 @@ public class ConfigHelper {
 				}
 		);
 		panel.addUIElement(enableDebuggingButton);
+		
+		y -= 75.0F;
+		
+		ModLabeledButton clearNoticesButton = new ModLabeledButton(
+				strings.get("clearNotices"),
+				350.0F,
+				y,
+				Settings.CREAM_COLOR,
+				Settings.BLUE_TEXT_COLOR,
+				panel,
+				(button) -> {
+					SignatureHelperInternal.clearNotices();
+				}
+		);
+		panel.addUIElement(clearNoticesButton);
 
-		y -= 150.0F;
+		y -= 75.0F;
 
 		ModLabeledButton resetNoticesButton = new ModLabeledButton(
 				strings.get("resetNotices"),
 				350.0F,
 				y,
 				Settings.CREAM_COLOR,
-				Settings.BLUE_TEXT_COLOR,
+				Settings.GREEN_TEXT_COLOR,
 				panel,
 				(button) -> {
 					SignatureHelperInternal.resetNotices();
