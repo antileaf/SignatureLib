@@ -1,6 +1,5 @@
 package me.antileaf.signature.card;
 
-import basemod.BaseMod;
 import basemod.ReflectionHacks;
 import basemod.abstracts.CustomCard;
 import basemod.patches.com.megacrit.cardcrawl.cards.AbstractCard.MultiCardPreview;
@@ -151,7 +150,7 @@ public abstract class AbstractSignatureCard extends CustomCard {
 	public void update() {
 		super.update();
 
-		if (this.signatureHovered || (MiscHelper.isInBattle() && this.isHoveredInHand(1.0F))) {
+		if (this.signatureHovered || (MiscHelper.isInBattle() && this.isHoveredInHand(this.drawScale))) {
 			this.signatureHoveredTimer += Gdx.graphics.getDeltaTime();
 			if (this.signatureHoveredTimer >= SignatureHelperInternal.FADE_DURATION)
 				this.signatureHoveredTimer = SignatureHelperInternal.FADE_DURATION;

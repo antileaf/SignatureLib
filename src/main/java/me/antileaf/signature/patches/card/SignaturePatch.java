@@ -41,7 +41,7 @@ public class SignaturePatch {
 				float forcedTimer = Fields.forcedTimer.get(_inst);
 
 				if (Fields.signatureHovered.get(_inst) ||
-						(MiscHelper.isInBattle() && _inst.isHoveredInHand(1.0F))) {
+						(MiscHelper.isInBattle() && _inst.isHoveredInHand(_inst.drawScale))) {
 					hoveredTimer = Math.min(hoveredTimer + Gdx.graphics.getDeltaTime(), SignatureHelperInternal.FADE_DURATION);
 					Fields.signatureHoveredTimer.set(_inst, hoveredTimer);
 				}

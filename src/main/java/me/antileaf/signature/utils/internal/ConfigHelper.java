@@ -17,6 +17,7 @@ import java.util.Properties;
 
 public class ConfigHelper {
 	public static final String ENABLE_DEBUGGING = "enableDebugging";
+	public static final String ENABLE_DEBUGGING_NOTE = "enableDebuggingNote";
 	public static final String SIGNATURE_UNLOCKED = "signatureUnlocked_";
 	public static final String SIGNATURE_ENABLED = "signatureEnabled_";
 	public static final String SIGNATURE_NOTICE = "signatureNotice_";
@@ -103,6 +104,7 @@ public class ConfigHelper {
 		
 		ModLabeledToggleButton enableDebuggingButton = new ModLabeledToggleButton(
 				strings.get(ENABLE_DEBUGGING),
+				strings.get(ENABLE_DEBUGGING_NOTE),
 				350.0F,
 				y,
 				Settings.CREAM_COLOR,

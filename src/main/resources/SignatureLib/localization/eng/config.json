@@ -1,5 +1,6 @@
 {
   "enableDebugging": "Enable debugging (use Signatures without unlocking)",
+  "enableDebuggingNote": "Note: If the mod author has disabled debugging for their Signatures, you won't be able to use them without unlocking, even if this option is enabled.",
   "clearNotices": "Clear new Signature notices",
   "resetNotices": "Reset new Signature notices"
 }

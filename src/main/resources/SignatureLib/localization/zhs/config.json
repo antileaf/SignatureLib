@@ -1,5 +1,6 @@
 {
   "enableDebugging": "启用调试功能（无需解锁即可使用异画）",
+  "enableDebuggingNote": "请注意：如果 Mod 作者为自己的异画禁用了调试功能，即使启用了此选项，也无法直接使用这些异画。",
   "clearNotices": "清除新异画提醒",
   "resetNotices": "重置新异画提醒"
 }

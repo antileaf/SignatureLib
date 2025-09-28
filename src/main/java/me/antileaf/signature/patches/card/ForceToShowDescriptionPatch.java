@@ -77,7 +77,7 @@ public class ForceToShowDescriptionPatch {
 	@SpirePatch(clz = ShowCardBrieflyEffect.class, method = "update", paramtypez = {})
 	public static class ShowCardBrieflyEffectPatch3 {
 		@SpirePrefixPatch
-		public static void Postfix(ShowCardBrieflyEffect _inst, AbstractCard ___card) {
+		public static void Prefix(ShowCardBrieflyEffect _inst, AbstractCard ___card) {
 			if (_inst.duration - Gdx.graphics.getDeltaTime() > 0.0F &&
 					SignatureHelperInternal.shouldUseSignature(___card))
 				SignatureHelperInternal.forceToShowDescription(___card);
@@ -104,6 +104,69 @@ public class ForceToShowDescriptionPatch {
 				SignatureHelperInternal.forceToShowDescription(___card);
 		}
 	}
+	
+//	@SpirePatch(clz = ShowCardAndAddToDrawPileEffect.class, method = SpirePatch.CONSTRUCTOR,
+//			paramtypez = {AbstractCard.class, float.class, float.class, boolean.class, boolean.class, boolean.class})
+//	public static class ShowCardAndAddToDrawPileEffectPatch1 {
+//		@SpirePostfixPatch
+//		public static void Postfix(ShowCardAndAddToDrawPileEffect _inst, AbstractCard card,
+//								   float x, float y, boolean randomSpot, boolean cardOffset, boolean toBottom) {
+//			if (SignatureHelperInternal.shouldUseSignature(card))
+//				SignatureHelperInternal.forceToShowDescription(card);
+//		}
+//	}
+//
+//	@SpirePatch(clz = ShowCardAndAddToDrawPileEffect.class, method = SpirePatch.CONSTRUCTOR,
+//			paramtypez = {AbstractCard.class, boolean.class, boolean.class})
+//	public static class ShowCardAndAddToDrawPileEffectPatch2 {
+//		@SpirePostfixPatch
+//		public static void Postfix(ShowCardAndAddToDrawPileEffect _inst, AbstractCard card,
+//								   boolean randomSpot, boolean toBottom) {
+//			if (SignatureHelperInternal.shouldUseSignature(card))
+//				SignatureHelperInternal.forceToShowDescription(card);
+//		}
+//	}
+//
+//	@SpirePatch(clz = ShowCardAndAddToDrawPileEffect.class, method = "update", paramtypez = {})
+//	public static class ShowCardAndAddToDrawPileEffectPatch3 {
+//		@SpirePrefixPatch
+//		public static void Prefix(ShowCardAndAddToDrawPileEffect _inst, AbstractCard ___card) {
+//			if (_inst.duration - Gdx.graphics.getDeltaTime() > 0.0F &&
+//					SignatureHelperInternal.shouldUseSignature(___card))
+//				SignatureHelperInternal.forceToShowDescription(___card);
+//		}
+//	}
+//
+//	@SpirePatch(clz = ShowCardAndAddToDiscardEffect.class, method = SpirePatch.CONSTRUCTOR,
+//			paramtypez = {AbstractCard.class, float.class, float.class})
+//	public static class ShowCardAndAddToDiscardEffectPatch1 {
+//		@SpirePostfixPatch
+//		public static void Postfix(ShowCardAndAddToDiscardEffect _inst, AbstractCard card,
+//								   float x, float y) {
+//			if (SignatureHelperInternal.shouldUseSignature(card))
+//				SignatureHelperInternal.forceToShowDescription(card);
+//		}
+//	}
+//
+//	@SpirePatch(clz = ShowCardAndAddToDiscardEffect.class, method = SpirePatch.CONSTRUCTOR,
+//			paramtypez = {AbstractCard.class})
+//	public static class ShowCardAndAddToDiscardEffectPatch2 {
+//		@SpirePostfixPatch
+//		public static void Postfix(ShowCardAndAddToDiscardEffect _inst, AbstractCard card) {
+//			if (SignatureHelperInternal.shouldUseSignature(card))
+//				SignatureHelperInternal.forceToShowDescription(card);
+//		}
+//	}
+//
+//	@SpirePatch(clz = ShowCardAndAddToDiscardEffect.class, method = "update", paramtypez = {})
+//	public static class ShowCardAndAddToDiscardEffectPatch3 {
+//		@SpirePrefixPatch
+//		public static void Prefix(ShowCardAndAddToDiscardEffect _inst, AbstractCard ___card) {
+//			if (_inst.duration - Gdx.graphics.getDeltaTime() > 0.0F &&
+//					SignatureHelperInternal.shouldUseSignature(___card))
+//				SignatureHelperInternal.forceToShowDescription(___card);
+//		}
+//	}
 
 	@SpirePatch(clz = AbstractCard.class, method = "renderInLibrary",
 			paramtypez = {SpriteBatch.class})
