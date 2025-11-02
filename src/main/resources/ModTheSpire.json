@@ -8,9 +8,7 @@
   "dependencies": [
     "basemod"
   ],
-  "optional_dependencies": [
-    "AKDsMoreRelics"
-  ],
-  "version": "6.0.4",
+  "optional_dependencies": [],
+  "version": "6.0.5",
   "sts_version": "9-21-2023"
 }
