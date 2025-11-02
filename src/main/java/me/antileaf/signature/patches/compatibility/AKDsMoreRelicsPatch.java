@@ -7,7 +7,6 @@ import com.evacipated.cardcrawl.modthespire.patcher.PatchingException;
 import com.megacrit.cardcrawl.actions.utility.NewQueueCardAction;
 import com.megacrit.cardcrawl.actions.utility.UseCardAction;
 import com.megacrit.cardcrawl.cards.AbstractCard;
-import com.megacrit.cardcrawl.relics.AbstractRelic;
 import javassist.CannotCompileException;
 import javassist.CtBehavior;
 
@@ -32,6 +31,14 @@ public class AKDsMoreRelicsPatch {
 		public static void Insert(StoneOfResonance _inst, AbstractCard card, UseCardAction action, AbstractCard c2) {
 			c2.cardID = card.cardID;
 			sorMap.put(c2, true);
+		}
+		
+		@SpirePrefixPatch
+		public static SpireReturn<Void> Prefix(StoneOfResonance _inst, AbstractCard card, UseCardAction action) {
+			if (sorMap.containsKey(card))
+				return SpireReturn.Return();
+			
+			return SpireReturn.Continue();
 		}
 	}
 	
