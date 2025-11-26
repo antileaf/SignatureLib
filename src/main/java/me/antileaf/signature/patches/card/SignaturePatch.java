@@ -75,7 +75,10 @@ public class SignaturePatch {
 	}
 
 	public static void setPreviewTransparency(AbstractCard card, float transparency) {
-		Fields.previewTransparency.set(card, transparency);
+		if (card instanceof AbstractSignatureCard)
+			((AbstractSignatureCard) card).previewTransparency = transparency;
+		else
+			Fields.previewTransparency.set(card, transparency);
 	}
 
 	@SpirePatch(clz = AbstractCard.class, method = "hover", paramtypez = {})

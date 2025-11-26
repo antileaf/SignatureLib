@@ -266,7 +266,8 @@ public class SCVRenderCardPatch {
 		public static void Insert(SingleCardViewPopup _inst, SpriteBatch sb, AbstractCard ___card) {
 			if (SignatureHelperInternal.shouldUseSignature(___card.cardsToPreview))
 				SignaturePatch.setPreviewTransparency(___card.cardsToPreview,
-						SCVPanelPatch.Fields.hideDesc.get(_inst) ? 0.0F : 1.0F);
+						(SignatureHelperInternal.shouldUseSignature(___card) &&
+								SCVPanelPatch.Fields.hideDesc.get(_inst)) ? 0.0F : 1.0F);
 		}
 	}
 
@@ -281,7 +282,8 @@ public class SCVRenderCardPatch {
 				for (AbstractCard preview : MultiCardPreview.multiCardPreview.get(card))
 					if (SignatureHelperInternal.shouldUseSignature(preview))
 						SignaturePatch.setPreviewTransparency(preview,
-								SCVPanelPatch.Fields.hideDesc.get(_inst) ? 0.0F : 1.0F);
+								(SignatureHelperInternal.shouldUseSignature(card) &&
+										SCVPanelPatch.Fields.hideDesc.get(_inst)) ? 0.0F : 1.0F);
 		}
 	}
 
