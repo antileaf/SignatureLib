@@ -4,6 +4,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Map;
 
+@Deprecated
 public class UniquenessHelper {
 	public static final String ID = "signature_lib_uniqueness_identifier";
 

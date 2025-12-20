@@ -368,27 +368,23 @@ public abstract class SignatureHelperInternal {
 		easyUnlockSubscribers.add(subscriber);
 	}
 
-	public static EasyUnlock publishOnGameOver(GameOverScreen screen) {
+	public static ArrayList<EasyUnlock> publishOnGameOver(GameOverScreen screen) {
 		logger.info("Publishing onGameOver");
 
-		boolean duplicate = false;
-		EasyUnlock unlock = null;
+//		boolean duplicate = false;
+		ArrayList<EasyUnlock> unlocks = new ArrayList<>();
 
 		for (EasyUnlockSubscriber subscriber : easyUnlockSubscribers) {
 			EasyUnlock tmp = subscriber.receiveOnGameOver(screen);
-			if (tmp != null) {
-				if (unlock != null) {
-					if (!duplicate)
-						logger.warn("EasyUnlock: multiple unlocks found");
-
-					duplicate = true;
-				}
-
-				unlock = tmp;
-			}
+			if (tmp != null)
+				unlocks.add(tmp);
+			
+			ArrayList<EasyUnlock> more = subscriber.receiveOnGameOverMultiUnlocks(screen);
+			if (more != null)
+				unlocks.addAll(more);
 		}
 
-		return unlock;
+		return unlocks;
 	}
 
 	public static void initLibraryTypeNotice() {
