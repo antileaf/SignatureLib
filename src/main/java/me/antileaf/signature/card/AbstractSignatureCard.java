@@ -15,6 +15,7 @@ import com.megacrit.cardcrawl.cards.AbstractCard;
 import com.megacrit.cardcrawl.core.Settings;
 import com.megacrit.cardcrawl.helpers.FontHelper;
 import me.antileaf.signature.utils.SignatureHelper;
+import me.antileaf.signature.utils.internal.ConfigHelper;
 import me.antileaf.signature.utils.internal.MiscHelper;
 import me.antileaf.signature.utils.internal.SignatureHelperInternal;
 import org.apache.logging.log4j.LogManager;
@@ -173,6 +174,9 @@ public abstract class AbstractSignatureCard extends CustomCard {
 	}
 
 	public float getSignatureTransparency() {
+        if (ConfigHelper.alwaysShowDescriptions())
+            return 1.0F;
+
 		if (this.previewTransparency >= 0.0F)
 			return this.previewTransparency;
 

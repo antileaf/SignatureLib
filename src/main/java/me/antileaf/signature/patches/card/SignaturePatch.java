@@ -19,6 +19,7 @@ import javassist.expr.ExprEditor;
 import javassist.expr.MethodCall;
 import me.antileaf.signature.card.AbstractSignatureCard;
 import me.antileaf.signature.utils.SignatureHelper;
+import me.antileaf.signature.utils.internal.ConfigHelper;
 import me.antileaf.signature.utils.internal.MiscHelper;
 import me.antileaf.signature.utils.internal.SignatureHelperInternal;
 
@@ -65,6 +66,9 @@ public class SignaturePatch {
 	private static float getSignatureTransparency(AbstractCard card) {
 		if (card instanceof AbstractSignatureCard)
 			return ((AbstractSignatureCard) card).getSignatureTransparency();
+
+        if (ConfigHelper.alwaysShowDescriptions())
+            return 1.0F;
 
 		if (Fields.previewTransparency.get(card) >= 0.0F)
 			return Fields.previewTransparency.get(card);

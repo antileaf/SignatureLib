@@ -16,6 +16,7 @@ import java.util.Map;
 import java.util.Properties;
 
 public class ConfigHelper {
+    public static final String ALWAYS_SHOW_DESCRIPTIONS = "alwaysShowDescriptions";
 	public static final String ENABLE_DEBUGGING = "enableDebugging";
 	public static final String ENABLE_DEBUGGING_NOTE = "enableDebuggingNote";
 	public static final String SIGNATURE_UNLOCKED = "signatureUnlocked_";
@@ -28,6 +29,7 @@ public class ConfigHelper {
 	public static void loadConfig() {
 		try {
 			Properties defaults = new Properties();
+            defaults.setProperty(ALWAYS_SHOW_DESCRIPTIONS, "false");
 			defaults.setProperty(ENABLE_DEBUGGING, "false");
 
 			conf = new SpireConfig("SignatureLib", "config", defaults);
@@ -35,6 +37,15 @@ public class ConfigHelper {
 			e.printStackTrace();
 		}
 	}
+
+    public static boolean alwaysShowDescriptions() {
+        return conf.getBool(ALWAYS_SHOW_DESCRIPTIONS);
+    }
+
+    public static void setAlwaysShowDescriptions(boolean alwaysShowDescriptions) {
+        conf.setBool(ALWAYS_SHOW_DESCRIPTIONS, alwaysShowDescriptions);
+        save();
+    }
 
 	public static boolean enableDebugging() {
 		return conf.getBool(ENABLE_DEBUGGING);
@@ -101,6 +112,24 @@ public class ConfigHelper {
 		strings = gson.fromJson(json, (new TypeToken<Map<String, String>>() {}).getType());
 		
 		float y = 700.0F;
+
+        ModLabeledToggleButton alwaysShowDescriptionButton = new ModLabeledToggleButton(
+                strings.get(ALWAYS_SHOW_DESCRIPTIONS),
+                strings.get(ALWAYS_SHOW_DESCRIPTIONS + "Note"),
+                350.0F,
+                y,
+                Settings.CREAM_COLOR,
+                FontHelper.charDescFont,
+				alwaysShowDescriptions(),
+                panel,
+                (modLabel) -> {},
+                (button) -> {
+                    setAlwaysShowDescriptions(button.enabled);
+                }
+        );
+        panel.addUIElement(alwaysShowDescriptionButton);
+
+        y -= 50.0F;
 		
 		ModLabeledToggleButton enableDebuggingButton = new ModLabeledToggleButton(
 				strings.get(ENABLE_DEBUGGING),
@@ -119,7 +148,7 @@ public class ConfigHelper {
 		);
 		panel.addUIElement(enableDebuggingButton);
 		
-		y -= 75.0F;
+		y -= 100.0F;
 		
 		ModLabeledButton clearNoticesButton = new ModLabeledButton(
 				strings.get("clearNotices"),
